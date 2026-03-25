@@ -9,12 +9,12 @@
     "imageUrl": "https://raw.githubusercontent.com/sudoStacks/retreivr-jellyfin-plugin/main/icon.png",
     "versions": [
       {
-        "version": "0.1.2.0",
-        "changelog": "Release v0.1.2",
+        "version": "0.1.4.0",
+        "changelog": "Release v0.1.4",
         "targetAbi": "10.9.0.0",
-        "sourceUrl": "https://github.com/sudoStacks/retreivr-jellyfin-plugin/releases/download/v0.1.2/Retreivr.Jellyfin.Plugin.zip",
-        "checksum": "FAD9A6FF83219758450EA6507ECB2DD4",
-        "timestamp": "2026-03-25T17:22:49Z"
+        "sourceUrl": "https://github.com/sudoStacks/retreivr-jellyfin-plugin/releases/download/v0.1.4/Retreivr.Jellyfin.Plugin.zip",
+        "checksum": "6FD9FAE61F1A05E79FCAE32993628200",
+        "timestamp": "2026-03-25T19:35:52Z"
       }
     ]
   }
