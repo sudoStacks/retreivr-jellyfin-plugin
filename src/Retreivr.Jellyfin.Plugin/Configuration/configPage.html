@@ -117,7 +117,7 @@
   <div id="RetreivrConfigPage" data-role="page" class="page type-interior pluginConfigurationPage">
     <div data-role="content">
       <div class="content-primary retreivr-page">
-        <form id="RetreivrConfigForm" class="retreivr-group">
+        <div id="RetreivrConfigForm" class="retreivr-group">
           <div class="sectionTitleContainer flex align-items-center">
             <h2 class="sectionTitle">Retreivr</h2>
           </div>
@@ -175,7 +175,7 @@
           </div>
 
           <div class="retreivr-row">
-            <button is="emby-button" type="submit" class="raised button-submit">
+            <button is="emby-button" id="RetreivrSaveConfig" type="button" class="raised button-submit">
               <span>Save</span>
             </button>
             <button is="emby-button" id="RetreivrRefreshStatus" type="button" class="button-submit">
@@ -186,7 +186,7 @@
             </button>
           </div>
           <div id="RetreivrConfigMessage" class="retreivr-message"></div>
-        </form>
+        </div>
 
         <div class="retreivr-group">
           <div class="retreivr-subtitle">Backend Status</div>
@@ -580,8 +580,7 @@
       loadConfig().then(loadStatus).finally(() => Dashboard.hideLoadingMsg());
     });
 
-    byId("RetreivrConfigForm").addEventListener("submit", function (event) {
-      event.preventDefault();
+    const saveConfig = function () {
       Dashboard.showLoadingMsg();
       Promise.resolve().then(function () {
         const config = {
@@ -610,9 +609,10 @@
           setMessage("RetreivrConfigMessage", `Save failed: ${err.message}`, true);
           Dashboard.hideLoadingMsg();
         });
-    });
+    };
 
     byId("RetreivrRefreshStatus").addEventListener("click", () => loadStatus());
+    byId("RetreivrSaveConfig").addEventListener("click", () => saveConfig());
     byId("RetreivrOpenUi").addEventListener("click", () => {
       const url = coreBaseUrl();
       if (!url) {
