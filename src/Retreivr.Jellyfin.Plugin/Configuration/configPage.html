@@ -541,7 +541,7 @@
       }
     };
 
-    const loadConfig = () => ApiClient.getPluginConfiguration(pluginId).then((config) => {
+    const loadConfig = () => apiFetch("/Plugins/Retreivr/config").then((config) => {
       state.config = config;
       byId("ResolutionApiBaseUrl").value = readConfigValue(config, "ResolutionApiBaseUrl", "http://localhost:8000") || "";
       byId("ResolutionApiKey").value = readConfigValue(config, "ResolutionApiKey", "") || "";
@@ -583,38 +583,29 @@
     byId("RetreivrConfigForm").addEventListener("submit", function (event) {
       event.preventDefault();
       Dashboard.showLoadingMsg();
-      ApiClient.getPluginConfiguration(pluginId).then(function (config) {
-        const resolutionApiBaseUrl = byId("ResolutionApiBaseUrl").value;
-        const resolutionApiKey = byId("ResolutionApiKey").value;
-        const retreivrCoreBaseUrl = byId("RetreivrCoreBaseUrl").value;
-        const retreivrCoreApiKey = byId("RetreivrCoreApiKey").value;
-        const enableAvailabilityBadges = byId("EnableAvailabilityBadges").checked;
-        const enableInstantResolvedPlayback = byId("EnableInstantResolvedPlayback").checked;
-        const enableRetreivrDownloadActions = byId("EnableRetreivrDownloadActions").checked;
-        const requestTimeoutSeconds = parseInt(byId("RequestTimeoutSeconds").value || "5", 10);
+      Promise.resolve().then(function () {
+        const config = {
+          ResolutionApiBaseUrl: byId("ResolutionApiBaseUrl").value,
+          ResolutionApiKey: byId("ResolutionApiKey").value,
+          RetreivrCoreBaseUrl: byId("RetreivrCoreBaseUrl").value,
+          RetreivrCoreApiKey: byId("RetreivrCoreApiKey").value,
+          EnableAvailabilityBadges: byId("EnableAvailabilityBadges").checked,
+          EnableInstantResolvedPlayback: byId("EnableInstantResolvedPlayback").checked,
+          EnableRetreivrDownloadActions: byId("EnableRetreivrDownloadActions").checked,
+          RequestTimeoutSeconds: parseInt(byId("RequestTimeoutSeconds").value || "5", 10)
+        };
 
-        config.ResolutionApiBaseUrl = resolutionApiBaseUrl;
-        config.resolutionApiBaseUrl = resolutionApiBaseUrl;
-        config.ResolutionApiKey = resolutionApiKey;
-        config.resolutionApiKey = resolutionApiKey;
-        config.RetreivrCoreBaseUrl = retreivrCoreBaseUrl;
-        config.retreivrCoreBaseUrl = retreivrCoreBaseUrl;
-        config.RetreivrCoreApiKey = retreivrCoreApiKey;
-        config.retreivrCoreApiKey = retreivrCoreApiKey;
-        config.EnableAvailabilityBadges = enableAvailabilityBadges;
-        config.enableAvailabilityBadges = enableAvailabilityBadges;
-        config.EnableInstantResolvedPlayback = enableInstantResolvedPlayback;
-        config.enableInstantResolvedPlayback = enableInstantResolvedPlayback;
-        config.EnableRetreivrDownloadActions = enableRetreivrDownloadActions;
-        config.enableRetreivrDownloadActions = enableRetreivrDownloadActions;
-        config.RequestTimeoutSeconds = requestTimeoutSeconds;
-        config.requestTimeoutSeconds = requestTimeoutSeconds;
-
-        return ApiClient.updatePluginConfiguration(pluginId, config);
+        return apiFetch("/Plugins/Retreivr/config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(config)
+        });
       }).then(function () {
         setMessage("RetreivrConfigMessage", "Settings saved.");
         return loadConfig().then(loadStatus);
-      }).then(Dashboard.processPluginConfigurationUpdateResult)
+      }).then(function () {
+        Dashboard.hideLoadingMsg();
+      })
         .catch(function (err) {
           setMessage("RetreivrConfigMessage", `Save failed: ${err.message}`, true);
           Dashboard.hideLoadingMsg();

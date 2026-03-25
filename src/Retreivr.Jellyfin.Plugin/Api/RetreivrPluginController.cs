@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediaBrowser.Controller.Library;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Retreivr.Jellyfin.Plugin.Configuration;
 using Retreivr.Jellyfin.Plugin.Services;
 
@@ -21,6 +22,7 @@ public sealed class RetreivrPluginController : ControllerBase
     private readonly ResolutionAvailabilityService _availabilityService;
     private readonly RetreivrDownloadService _downloadService;
     private readonly RetreivrCoreClient _retreivrCoreClient;
+    private readonly ILogger<RetreivrPluginController> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RetreivrPluginController"/> class.
@@ -29,12 +31,14 @@ public sealed class RetreivrPluginController : ControllerBase
         ILibraryManager libraryManager,
         ResolutionAvailabilityService availabilityService,
         RetreivrDownloadService downloadService,
-        RetreivrCoreClient retreivrCoreClient)
+        RetreivrCoreClient retreivrCoreClient,
+        ILogger<RetreivrPluginController> logger)
     {
         _libraryManager = libraryManager ?? throw new ArgumentNullException(nameof(libraryManager));
         _availabilityService = availabilityService ?? throw new ArgumentNullException(nameof(availabilityService));
         _downloadService = downloadService ?? throw new ArgumentNullException(nameof(downloadService));
         _retreivrCoreClient = retreivrCoreClient ?? throw new ArgumentNullException(nameof(retreivrCoreClient));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -53,6 +57,38 @@ public sealed class RetreivrPluginController : ControllerBase
             enableInstantResolvedPlayback = config?.EnableInstantResolvedPlayback ?? false,
             enableRetreivrDownloadActions = config?.EnableRetreivrDownloadActions ?? false
         });
+    }
+
+    /// <summary>
+    /// Get the current persisted plugin configuration.
+    /// </summary>
+    [HttpGet("config")]
+    public ActionResult<PluginConfiguration> GetConfig()
+    {
+        return Ok(Plugin.Instance?.Configuration ?? new PluginConfiguration());
+    }
+
+    /// <summary>
+    /// Persist plugin configuration directly through the plugin runtime.
+    /// </summary>
+    [HttpPost("config")]
+    public ActionResult<PluginConfiguration> SaveConfig([FromBody] PluginConfiguration configuration)
+    {
+        if (Plugin.Instance is null)
+        {
+            return StatusCode(503);
+        }
+
+        configuration ??= new PluginConfiguration();
+        Plugin.Instance.UpdateConfiguration(configuration);
+        _logger.LogInformation(
+            "Retreivr plugin config saved resolutionApiBaseUrl={ResolutionApiBaseUrl} retreivrCoreBaseUrl={RetreivrCoreBaseUrl} availabilityBadges={EnableAvailabilityBadges} instantPlayback={EnableInstantResolvedPlayback} downloadActions={EnableRetreivrDownloadActions}",
+            configuration.ResolutionApiBaseUrl,
+            configuration.RetreivrCoreBaseUrl,
+            configuration.EnableAvailabilityBadges,
+            configuration.EnableInstantResolvedPlayback,
+            configuration.EnableRetreivrDownloadActions);
+        return Ok(Plugin.Instance.Configuration);
     }
 
     /// <summary>
