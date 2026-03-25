@@ -1,0 +1,20 @@
+[
+  {
+    "guid": "5fe1b9d8-2f4d-48d9-8fc3-f37b4760a96f",
+    "name": "Retreivr",
+    "description": "Retreivr resolution-network integration for Jellyfin.",
+    "overview": "Adds MusicBrainz-aware availability lookups and Retreivr download dispatch to Jellyfin.",
+    "owner": "sudostacks",
+    "category": "General",
+    "versions": [
+      {
+        "version": "0.1.0.0",
+        "changelog": "Initial scaffold of the Retreivr Jellyfin plugin.",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/sudoStacks/retreivr-jellyfin-plugin/releases/latest/download/Retreivr.Jellyfin.Plugin.zip",
+        "checksum": "",
+        "timestamp": "2026-03-25T00:00:00Z"
+      }
+    ]
+  }
+]

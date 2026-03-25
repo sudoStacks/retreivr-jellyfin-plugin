@@ -78,9 +78,30 @@ With the current scaffold, the next implementation pass can begin wiring:
 
 ## Release Automation
 
-- pushes and PRs run the build workflow
+- normal pushes do not run CI
+- manual builds are available through `workflow_dispatch`
 - tags matching `v*` build and package the plugin automatically
 - the release workflow stamps the assembly/build manifest version from the tag before packaging
+- the repository manifest is at `manifest.json` and is intended to be served from the repo root on `main`
+
+## Jellyfin Repository URL
+
+Once the GitHub repo exists at `sudoStacks/retreivr-jellyfin-plugin`, the repository URL to paste into Jellyfin will be:
+
+`https://raw.githubusercontent.com/sudoStacks/retreivr-jellyfin-plugin/main/manifest.json`
+
+Installation path in Jellyfin:
+
+1. Dashboard
+2. Plugins
+3. Repositories
+4. Add repository
+5. Paste the manifest URL above
+6. Save
+7. Open `Catalog`
+8. Find `Retreivr`
+9. Install
+10. Restart Jellyfin
 
 ## Local Build Note
 

@@ -43,9 +43,19 @@ public static class MusicBrainzProviderIdResolver
 
     private static string? FirstProviderId(BaseItem item, IEnumerable<string> keys)
     {
+        var providerIds = item.ProviderIds;
+        if (providerIds is null)
+        {
+            return null;
+        }
+
         foreach (var key in keys)
         {
-            var value = item.GetProviderId(key);
+            if (!providerIds.TryGetValue(key, out var value))
+            {
+                continue;
+            }
+
             if (!string.IsNullOrWhiteSpace(value))
             {
                 return value.Trim();
