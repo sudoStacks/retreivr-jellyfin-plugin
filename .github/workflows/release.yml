@@ -41,37 +41,6 @@ jobs:
           sed -i "s#<AssemblyVersion>.*</AssemblyVersion>#<AssemblyVersion>${VERSION}</AssemblyVersion>#" Directory.Build.props
           sed -i "s#<FileVersion>.*</FileVersion>#<FileVersion>${VERSION}</FileVersion>#" Directory.Build.props
           sed -i "s#version: \".*\"#version: \"${VERSION}\"#" build.yaml
-          python3 - <<'PY'
-          from pathlib import Path
-          import json
-          from datetime import datetime, timezone
-
-          manifest_path = Path("manifest.json")
-          payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-          entry = payload[0]
-          version = "${{ steps.version.outputs.version }}"
-          versions = entry.get("versions") or [{}]
-          item = versions[0]
-          item["version"] = version
-          item["timestamp"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-          item["sourceUrl"] = "https://github.com/sudoStacks/retreivr-jellyfin-plugin/releases/latest/download/Retreivr.Jellyfin.Plugin.zip"
-          entry["versions"] = [item]
-          manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-          PY
-
-      - name: Update manifest on main
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git checkout main
-          git add manifest.json
-          if git diff --cached --quiet; then
-            exit 0
-          fi
-          git commit -m "Update plugin manifest for ${{ github.ref_name }}"
-          git push origin HEAD:main
 
       - name: Restore
         run: dotnet restore Retreivr.Jellyfin.Plugin.sln
@@ -91,9 +60,49 @@ jobs:
           cd artifacts/package
           zip -r ../Retreivr.Jellyfin.Plugin.zip .
 
+      - name: Update manifest with versioned asset and checksum
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="${GITHUB_REF_NAME}"
+          CHECKSUM="$(md5sum artifacts/Retreivr.Jellyfin.Plugin.zip | awk '{print toupper($1)}')"
+          python3 - <<PY
+          from pathlib import Path
+          import json
+          from datetime import datetime, timezone
+
+          manifest_path = Path("manifest.json")
+          payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+          entry = payload[0]
+          item = {
+              "version": "${VERSION}",
+              "changelog": f"Release ${TAG}",
+              "targetAbi": "10.9.0.0",
+              "sourceUrl": f"https://github.com/sudoStacks/retreivr-jellyfin-plugin/releases/download/${TAG}/Retreivr.Jellyfin.Plugin.zip",
+              "checksum": "${CHECKSUM}",
+              "timestamp": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+          }
+          entry["versions"] = [item]
+          manifest_path.write_text(json.dumps(payload, indent=2) + "\\n", encoding="utf-8")
+          PY
+
       - name: Upload release asset
         uses: softprops/action-gh-release@v2
         with:
           files: |
             artifacts/Retreivr.Jellyfin.Plugin.zip
             manifest.json
+
+      - name: Update manifest on main
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          git add manifest.json
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Update plugin manifest for ${{ github.ref_name }}"
+          git push origin HEAD:main

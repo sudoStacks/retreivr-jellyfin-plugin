@@ -1,4 +1,4 @@
-# Retreivr Jellyfin Plugin
+# Retreivr - Music Search and Acquisition
 
 Jellyfin plugin scaffold for the Retreivr resolution network.
 

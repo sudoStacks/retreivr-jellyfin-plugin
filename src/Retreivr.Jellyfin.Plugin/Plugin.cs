@@ -31,7 +31,7 @@ public sealed class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     public static Plugin? Instance { get; private set; }
 
     /// <inheritdoc />
-    public override string Name => "Retreivr";
+    public override string Name => "Retreivr - Music Search and Acquisition";
 
     /// <inheritdoc />
     public override Guid Id => Guid.Parse("5fe1b9d8-2f4d-48d9-8fc3-f37b4760a96f");
