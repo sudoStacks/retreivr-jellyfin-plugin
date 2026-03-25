@@ -69,19 +69,32 @@
 
   <script type="text/javascript">
     const pluginId = "5fe1b9d8-2f4d-48d9-8fc3-f37b4760a96f";
+    const readConfigValue = (config, pascalName, fallback) => {
+      if (!config || typeof config !== "object") {
+        return fallback;
+      }
+      if (config[pascalName] !== undefined) {
+        return config[pascalName];
+      }
+      const camelName = pascalName.charAt(0).toLowerCase() + pascalName.slice(1);
+      if (config[camelName] !== undefined) {
+        return config[camelName];
+      }
+      return fallback;
+    };
 
     document.querySelector("#RetreivrConfigPage")
       .addEventListener("pageshow", function () {
         Dashboard.showLoadingMsg();
         ApiClient.getPluginConfiguration(pluginId).then(function (config) {
-          document.querySelector("#ResolutionApiBaseUrl").value = config.ResolutionApiBaseUrl || "";
-          document.querySelector("#ResolutionApiKey").value = config.ResolutionApiKey || "";
-          document.querySelector("#RetreivrCoreBaseUrl").value = config.RetreivrCoreBaseUrl || "";
-          document.querySelector("#RetreivrCoreApiKey").value = config.RetreivrCoreApiKey || "";
-          document.querySelector("#EnableAvailabilityBadges").checked = !!config.EnableAvailabilityBadges;
-          document.querySelector("#EnableInstantResolvedPlayback").checked = !!config.EnableInstantResolvedPlayback;
-          document.querySelector("#EnableRetreivrDownloadActions").checked = !!config.EnableRetreivrDownloadActions;
-          document.querySelector("#RequestTimeoutSeconds").value = Number(config.RequestTimeoutSeconds || 5);
+          document.querySelector("#ResolutionApiBaseUrl").value = readConfigValue(config, "ResolutionApiBaseUrl", "http://localhost:8000") || "";
+          document.querySelector("#ResolutionApiKey").value = readConfigValue(config, "ResolutionApiKey", "") || "";
+          document.querySelector("#RetreivrCoreBaseUrl").value = readConfigValue(config, "RetreivrCoreBaseUrl", "http://localhost:8000") || "";
+          document.querySelector("#RetreivrCoreApiKey").value = readConfigValue(config, "RetreivrCoreApiKey", "") || "";
+          document.querySelector("#EnableAvailabilityBadges").checked = !!readConfigValue(config, "EnableAvailabilityBadges", true);
+          document.querySelector("#EnableInstantResolvedPlayback").checked = !!readConfigValue(config, "EnableInstantResolvedPlayback", false);
+          document.querySelector("#EnableRetreivrDownloadActions").checked = !!readConfigValue(config, "EnableRetreivrDownloadActions", true);
+          document.querySelector("#RequestTimeoutSeconds").value = Number(readConfigValue(config, "RequestTimeoutSeconds", 5) || 5);
           Dashboard.hideLoadingMsg();
         });
       });
@@ -91,14 +104,31 @@
         event.preventDefault();
         Dashboard.showLoadingMsg();
         ApiClient.getPluginConfiguration(pluginId).then(function (config) {
-          config.ResolutionApiBaseUrl = document.querySelector("#ResolutionApiBaseUrl").value;
-          config.ResolutionApiKey = document.querySelector("#ResolutionApiKey").value;
-          config.RetreivrCoreBaseUrl = document.querySelector("#RetreivrCoreBaseUrl").value;
-          config.RetreivrCoreApiKey = document.querySelector("#RetreivrCoreApiKey").value;
-          config.EnableAvailabilityBadges = document.querySelector("#EnableAvailabilityBadges").checked;
-          config.EnableInstantResolvedPlayback = document.querySelector("#EnableInstantResolvedPlayback").checked;
-          config.EnableRetreivrDownloadActions = document.querySelector("#EnableRetreivrDownloadActions").checked;
-          config.RequestTimeoutSeconds = parseInt(document.querySelector("#RequestTimeoutSeconds").value || "5", 10);
+          const resolutionApiBaseUrl = document.querySelector("#ResolutionApiBaseUrl").value;
+          const resolutionApiKey = document.querySelector("#ResolutionApiKey").value;
+          const retreivrCoreBaseUrl = document.querySelector("#RetreivrCoreBaseUrl").value;
+          const retreivrCoreApiKey = document.querySelector("#RetreivrCoreApiKey").value;
+          const enableAvailabilityBadges = document.querySelector("#EnableAvailabilityBadges").checked;
+          const enableInstantResolvedPlayback = document.querySelector("#EnableInstantResolvedPlayback").checked;
+          const enableRetreivrDownloadActions = document.querySelector("#EnableRetreivrDownloadActions").checked;
+          const requestTimeoutSeconds = parseInt(document.querySelector("#RequestTimeoutSeconds").value || "5", 10);
+
+          config.ResolutionApiBaseUrl = resolutionApiBaseUrl;
+          config.resolutionApiBaseUrl = resolutionApiBaseUrl;
+          config.ResolutionApiKey = resolutionApiKey;
+          config.resolutionApiKey = resolutionApiKey;
+          config.RetreivrCoreBaseUrl = retreivrCoreBaseUrl;
+          config.retreivrCoreBaseUrl = retreivrCoreBaseUrl;
+          config.RetreivrCoreApiKey = retreivrCoreApiKey;
+          config.retreivrCoreApiKey = retreivrCoreApiKey;
+          config.EnableAvailabilityBadges = enableAvailabilityBadges;
+          config.enableAvailabilityBadges = enableAvailabilityBadges;
+          config.EnableInstantResolvedPlayback = enableInstantResolvedPlayback;
+          config.enableInstantResolvedPlayback = enableInstantResolvedPlayback;
+          config.EnableRetreivrDownloadActions = enableRetreivrDownloadActions;
+          config.enableRetreivrDownloadActions = enableRetreivrDownloadActions;
+          config.RequestTimeoutSeconds = requestTimeoutSeconds;
+          config.requestTimeoutSeconds = requestTimeoutSeconds;
           ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);
         });
       });
