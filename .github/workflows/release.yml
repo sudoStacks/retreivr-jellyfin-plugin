@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Compute version
+        id: version
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          IFS='.' read -r -a PARTS <<< "$TAG"
+          if [ "${#PARTS[@]}" -eq 3 ]; then
+            VERSION="${PARTS[0]}.${PARTS[1]}.${PARTS[2]}.0"
+          else
+            VERSION="$TAG"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Stamp version files
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          sed -i "s#<Version>.*</Version>#<Version>${VERSION}</Version>#" Directory.Build.props
+          sed -i "s#<AssemblyVersion>.*</AssemblyVersion>#<AssemblyVersion>${VERSION}</AssemblyVersion>#" Directory.Build.props
+          sed -i "s#<FileVersion>.*</FileVersion>#<FileVersion>${VERSION}</FileVersion>#" Directory.Build.props
+          sed -i "s#version: \".*\"#version: \"${VERSION}\"#" build.yaml
+
+      - name: Restore
+        run: dotnet restore Retreivr.Jellyfin.Plugin.sln
+
+      - name: Publish
+        run: dotnet publish src/Retreivr.Jellyfin.Plugin/Retreivr.Jellyfin.Plugin.csproj -c Release -o artifacts/publish
+
+      - name: Prepare package
+        shell: bash
+        run: |
+          mkdir -p artifacts/package
+          cp build.yaml artifacts/package/build.yaml
+          cp artifacts/publish/Retreivr.Jellyfin.Plugin.dll artifacts/package/
+          if [ -f artifacts/publish/Retreivr.Jellyfin.Plugin.pdb ]; then
+            cp artifacts/publish/Retreivr.Jellyfin.Plugin.pdb artifacts/package/
+          fi
+          cd artifacts/package
+          zip -r ../Retreivr.Jellyfin.Plugin-${{ steps.version.outputs.version }}.zip .
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/Retreivr.Jellyfin.Plugin-${{ steps.version.outputs.version }}.zip
