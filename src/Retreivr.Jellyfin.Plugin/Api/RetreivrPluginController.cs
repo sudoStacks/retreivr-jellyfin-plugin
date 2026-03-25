@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediaBrowser.Controller.Library;
 using Microsoft.AspNetCore.Mvc;
+using Retreivr.Jellyfin.Plugin.Configuration;
 using Retreivr.Jellyfin.Plugin.Services;
 
 namespace Retreivr.Jellyfin.Plugin.Api;
@@ -19,6 +20,7 @@ public sealed class RetreivrPluginController : ControllerBase
     private readonly ILibraryManager _libraryManager;
     private readonly ResolutionAvailabilityService _availabilityService;
     private readonly RetreivrDownloadService _downloadService;
+    private readonly RetreivrCoreClient _retreivrCoreClient;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RetreivrPluginController"/> class.
@@ -26,11 +28,13 @@ public sealed class RetreivrPluginController : ControllerBase
     public RetreivrPluginController(
         ILibraryManager libraryManager,
         ResolutionAvailabilityService availabilityService,
-        RetreivrDownloadService downloadService)
+        RetreivrDownloadService downloadService,
+        RetreivrCoreClient retreivrCoreClient)
     {
         _libraryManager = libraryManager ?? throw new ArgumentNullException(nameof(libraryManager));
         _availabilityService = availabilityService ?? throw new ArgumentNullException(nameof(availabilityService));
         _downloadService = downloadService ?? throw new ArgumentNullException(nameof(downloadService));
+        _retreivrCoreClient = retreivrCoreClient ?? throw new ArgumentNullException(nameof(retreivrCoreClient));
     }
 
     /// <summary>
@@ -48,6 +52,50 @@ public sealed class RetreivrPluginController : ControllerBase
             enableAvailabilityBadges = config?.EnableAvailabilityBadges ?? false,
             enableInstantResolvedPlayback = config?.EnableInstantResolvedPlayback ?? false,
             enableRetreivrDownloadActions = config?.EnableRetreivrDownloadActions ?? false
+        });
+    }
+
+    /// <summary>
+    /// Get plugin runtime and backend connectivity status.
+    /// </summary>
+    [HttpGet("status")]
+    public async Task<ActionResult<object>> GetStatusAsync(CancellationToken cancellationToken)
+    {
+        var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+        var resolutionHealthy = false;
+        var coreHealthy = false;
+        string? resolutionError = null;
+        string? coreError = null;
+
+        try
+        {
+            var resolution = await _availabilityService.GetHealthAsync(cancellationToken).ConfigureAwait(false);
+            resolutionHealthy = resolution is not null;
+        }
+        catch (Exception ex)
+        {
+            resolutionError = ex.Message;
+        }
+
+        try
+        {
+            var health = await _retreivrCoreClient.GetHealthAsync(cancellationToken).ConfigureAwait(false);
+            coreHealthy = health is not null;
+        }
+        catch (Exception ex)
+        {
+            coreError = ex.Message;
+        }
+
+        return Ok(new
+        {
+            resolutionApiBaseUrl = config.ResolutionApiBaseUrl,
+            retreivrCoreBaseUrl = config.RetreivrCoreBaseUrl,
+            resolutionApiHealthy = resolutionHealthy,
+            retreivrCoreHealthy = coreHealthy,
+            resolutionApiError = resolutionError,
+            retreivrCoreError = coreError,
+            retreivrUiUrl = _retreivrCoreClient.GetConfiguredBaseUrl()
         });
     }
 
@@ -73,6 +121,70 @@ public sealed class RetreivrPluginController : ControllerBase
     {
         var results = await _availabilityService.GetBulkAvailabilityAsync(mbids, cancellationToken).ConfigureAwait(false);
         return Ok(results);
+    }
+
+    /// <summary>
+    /// Proxy music search to Retreivr Core.
+    /// </summary>
+    [HttpGet("music/search")]
+    public async Task<ActionResult<object>> SearchMusicAsync(
+        [FromQuery] string artist = "",
+        [FromQuery] string album = "",
+        [FromQuery] string track = "",
+        [FromQuery] string mode = "auto",
+        CancellationToken cancellationToken = default)
+    {
+        var payload = await _retreivrCoreClient.SearchMusicAsync(artist, album, track, mode, cancellationToken).ConfigureAwait(false);
+        return payload is null ? StatusCode(503) : Ok(payload.RootElement.Clone());
+    }
+
+    /// <summary>
+    /// Proxy album search to Retreivr Core.
+    /// </summary>
+    [HttpGet("music/albums/search")]
+    public async Task<ActionResult<object>> SearchAlbumsAsync(
+        [FromQuery] string q = "",
+        [FromQuery(Name = "artist_mbid")] string artistMbid = "",
+        CancellationToken cancellationToken = default)
+    {
+        var payload = await _retreivrCoreClient.SearchAlbumsAsync(q, artistMbid, cancellationToken).ConfigureAwait(false);
+        return payload is null ? StatusCode(503) : Ok(payload.RootElement.Clone());
+    }
+
+    /// <summary>
+    /// Proxy album tracks lookup to Retreivr Core.
+    /// </summary>
+    [HttpGet("music/albums/{releaseGroupMbid}/tracks")]
+    public async Task<ActionResult<object>> GetAlbumTracksAsync(
+        [FromRoute] string releaseGroupMbid,
+        CancellationToken cancellationToken = default)
+    {
+        var payload = await _retreivrCoreClient.GetAlbumTracksAsync(releaseGroupMbid, cancellationToken).ConfigureAwait(false);
+        return payload is null ? StatusCode(503) : Ok(payload.RootElement.Clone());
+    }
+
+    /// <summary>
+    /// Proxy full-album download to Retreivr Core.
+    /// </summary>
+    [HttpPost("music/albums/{releaseGroupMbid}/download")]
+    public async Task<ActionResult<object>> DownloadAlbumAsync(
+        [FromRoute] string releaseGroupMbid,
+        CancellationToken cancellationToken = default)
+    {
+        var payload = await _retreivrCoreClient.DownloadAlbumAsync(releaseGroupMbid, cancellationToken).ConfigureAwait(false);
+        return payload is null ? StatusCode(503) : Ok(payload.RootElement.Clone());
+    }
+
+    /// <summary>
+    /// Proxy track enqueue to Retreivr Core.
+    /// </summary>
+    [HttpPost("music/enqueue")]
+    public async Task<ActionResult<object>> EnqueueMusicAsync(
+        [FromBody] object payload,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await _retreivrCoreClient.EnqueueMusicPayloadAsync(payload, cancellationToken).ConfigureAwait(false);
+        return response is null ? StatusCode(503) : Ok(response.RootElement.Clone());
     }
 
     /// <summary>

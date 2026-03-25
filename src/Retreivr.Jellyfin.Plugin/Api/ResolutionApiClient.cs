@@ -66,6 +66,12 @@ public sealed class ResolutionApiClient
         return SendAsync<ResolutionBulkResponse>("resolve/bulk", content, cancellationToken);
     }
 
+    /// <summary>
+    /// Get Resolution API health.
+    /// </summary>
+    public Task<JsonDocument?> GetHealthAsync(CancellationToken cancellationToken = default)
+        => SendAsync<JsonDocument>("health", null, cancellationToken);
+
     private async Task<T?> SendAsync<T>(string relativePath, HttpContent? content, CancellationToken cancellationToken)
     {
         var baseUrl = (_configuration.ResolutionApiBaseUrl ?? string.Empty).Trim().TrimEnd('/');

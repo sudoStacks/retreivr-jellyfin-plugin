@@ -56,6 +56,12 @@ public sealed class ResolutionAvailabilityService
         return response.Results.Select(ToAvailabilityResult).ToArray();
     }
 
+    /// <summary>
+    /// Get Resolution API health payload.
+    /// </summary>
+    public Task<System.Text.Json.JsonDocument?> GetHealthAsync(CancellationToken cancellationToken = default)
+        => _client.GetHealthAsync(cancellationToken);
+
     private static ResolutionAvailabilityResult ToAvailabilityResult(ResolutionRecordResponse? response)
     {
         var status = NormalizeStatus(response?.Availability?.Status);

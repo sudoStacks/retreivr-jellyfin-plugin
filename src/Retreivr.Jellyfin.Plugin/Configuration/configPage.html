@@ -3,34 +3,149 @@
 <head>
   <meta charset="utf-8" />
   <title>Retreivr</title>
+  <style>
+    .retreivr-page {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .retreivr-group {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .retreivr-grid {
+      display: grid;
+      gap: 12px 16px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .retreivr-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .retreivr-status {
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .retreivr-search-results {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .retreivr-card {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .retreivr-thumb {
+      width: 76px;
+      height: 76px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      flex: 0 0 auto;
+    }
+
+    .retreivr-thumb.placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 12px;
+    }
+
+    .retreivr-card-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .retreivr-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+
+    .retreivr-card-meta {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.72);
+      margin-bottom: 6px;
+    }
+
+    .retreivr-card-ref {
+      font-family: monospace;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.55);
+      margin-bottom: 10px;
+      word-break: break-all;
+    }
+
+    .retreivr-subtitle {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .retreivr-message {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.75);
+      min-height: 20px;
+    }
+
+    .retreivr-message.error {
+      color: #ff7f7f;
+    }
+  </style>
 </head>
 <body>
   <div id="RetreivrConfigPage" data-role="page" class="page type-interior pluginConfigurationPage">
     <div data-role="content">
-      <div class="content-primary">
-        <form id="RetreivrConfigForm">
+      <div class="content-primary retreivr-page">
+        <form id="RetreivrConfigForm" class="retreivr-group">
           <div class="sectionTitleContainer flex align-items-center">
             <h2 class="sectionTitle">Retreivr</h2>
           </div>
 
-          <div class="inputContainer">
-            <label class="inputLabel inputLabelUnfocused" for="ResolutionApiBaseUrl">Resolution API Base URL</label>
-            <input id="ResolutionApiBaseUrl" name="ResolutionApiBaseUrl" type="text" />
+          <div class="retreivr-message">
+            Configure the Retreivr backend below, then use this page as the first in-Jellyfin search and acquisition surface.
           </div>
 
-          <div class="inputContainer">
-            <label class="inputLabel inputLabelUnfocused" for="ResolutionApiKey">Resolution API Key</label>
-            <input id="ResolutionApiKey" name="ResolutionApiKey" type="password" />
-          </div>
+          <div class="retreivr-grid">
+            <div class="inputContainer">
+              <label class="inputLabel inputLabelUnfocused" for="ResolutionApiBaseUrl">Resolution API Base URL</label>
+              <input id="ResolutionApiBaseUrl" name="ResolutionApiBaseUrl" type="text" />
+            </div>
 
-          <div class="inputContainer">
-            <label class="inputLabel inputLabelUnfocused" for="RetreivrCoreBaseUrl">Retreivr Core Base URL</label>
-            <input id="RetreivrCoreBaseUrl" name="RetreivrCoreBaseUrl" type="text" />
-          </div>
+            <div class="inputContainer">
+              <label class="inputLabel inputLabelUnfocused" for="ResolutionApiKey">Resolution API Key</label>
+              <input id="ResolutionApiKey" name="ResolutionApiKey" type="password" />
+            </div>
 
-          <div class="inputContainer">
-            <label class="inputLabel inputLabelUnfocused" for="RetreivrCoreApiKey">Retreivr Core API Key</label>
-            <input id="RetreivrCoreApiKey" name="RetreivrCoreApiKey" type="password" />
+            <div class="inputContainer">
+              <label class="inputLabel inputLabelUnfocused" for="RetreivrCoreBaseUrl">Retreivr Core Base URL</label>
+              <input id="RetreivrCoreBaseUrl" name="RetreivrCoreBaseUrl" type="text" />
+            </div>
+
+            <div class="inputContainer">
+              <label class="inputLabel inputLabelUnfocused" for="RetreivrCoreApiKey">Retreivr Core API Key</label>
+              <input id="RetreivrCoreApiKey" name="RetreivrCoreApiKey" type="password" />
+            </div>
           </div>
 
           <div class="checkboxContainer checkboxContainer-withDescription">
@@ -59,16 +174,84 @@
             <input id="RequestTimeoutSeconds" name="RequestTimeoutSeconds" type="number" min="1" step="1" />
           </div>
 
-          <button is="emby-button" type="submit" class="raised button-submit block">
-            <span>Save</span>
-          </button>
+          <div class="retreivr-row">
+            <button is="emby-button" type="submit" class="raised button-submit">
+              <span>Save</span>
+            </button>
+            <button is="emby-button" id="RetreivrRefreshStatus" type="button" class="button-submit">
+              <span>Refresh Status</span>
+            </button>
+            <button is="emby-button" id="RetreivrOpenUi" type="button" class="button-submit">
+              <span>Open Retreivr UI</span>
+            </button>
+          </div>
+          <div id="RetreivrConfigMessage" class="retreivr-message"></div>
         </form>
+
+        <div class="retreivr-group">
+          <div class="retreivr-subtitle">Backend Status</div>
+          <div class="retreivr-message">
+            This checks the configured Resolution API and Retreivr Core base URLs using their health endpoints.
+          </div>
+          <div id="RetreivrStatus" class="retreivr-status">Loading...</div>
+        </div>
+
+        <div class="retreivr-group">
+          <div class="retreivr-subtitle">Music Search</div>
+          <div class="retreivr-grid">
+            <div class="inputContainer">
+              <label class="inputLabel inputLabelUnfocused" for="MusicSearchArtist">Artist</label>
+              <input id="MusicSearchArtist" type="text" />
+            </div>
+            <div class="inputContainer">
+              <label class="inputLabel inputLabelUnfocused" for="MusicSearchAlbum">Album</label>
+              <input id="MusicSearchAlbum" type="text" />
+            </div>
+            <div class="inputContainer">
+              <label class="inputLabel inputLabelUnfocused" for="MusicSearchTrack">Track</label>
+              <input id="MusicSearchTrack" type="text" />
+            </div>
+            <div class="inputContainer">
+              <label class="inputLabel inputLabelUnfocused" for="MusicSearchMode">Mode</label>
+              <select id="MusicSearchMode">
+                <option value="auto">Auto</option>
+                <option value="artist">Artist</option>
+                <option value="album">Album</option>
+                <option value="track">Track</option>
+              </select>
+            </div>
+          </div>
+          <div class="retreivr-row">
+            <button is="emby-button" id="MusicSearchSubmit" type="button" class="raised button-submit">
+              <span>Search</span>
+            </button>
+            <button is="emby-button" id="MusicSearchBack" type="button" class="button-submit" style="display:none;">
+              <span>Back</span>
+            </button>
+          </div>
+          <div id="MusicSearchMessage" class="retreivr-message"></div>
+          <div id="MusicSearchResults" class="retreivr-search-results"></div>
+        </div>
       </div>
     </div>
   </div>
 
   <script type="text/javascript">
     const pluginId = "5fe1b9d8-2f4d-48d9-8fc3-f37b4760a96f";
+    const state = {
+      config: null,
+      viewStack: [],
+      currentView: null
+    };
+
+    const byId = (id) => document.getElementById(id);
+    const setMessage = (id, text, isError = false) => {
+      const el = byId(id);
+      if (!el) return;
+      el.textContent = text || "";
+      el.classList.toggle("error", !!isError);
+    };
+
     const readConfigValue = (config, pascalName, fallback) => {
       if (!config || typeof config !== "object") {
         return fallback;
@@ -83,55 +266,372 @@
       return fallback;
     };
 
-    document.querySelector("#RetreivrConfigPage")
-      .addEventListener("pageshow", function () {
-        Dashboard.showLoadingMsg();
-        ApiClient.getPluginConfiguration(pluginId).then(function (config) {
-          document.querySelector("#ResolutionApiBaseUrl").value = readConfigValue(config, "ResolutionApiBaseUrl", "http://localhost:8000") || "";
-          document.querySelector("#ResolutionApiKey").value = readConfigValue(config, "ResolutionApiKey", "") || "";
-          document.querySelector("#RetreivrCoreBaseUrl").value = readConfigValue(config, "RetreivrCoreBaseUrl", "http://localhost:8000") || "";
-          document.querySelector("#RetreivrCoreApiKey").value = readConfigValue(config, "RetreivrCoreApiKey", "") || "";
-          document.querySelector("#EnableAvailabilityBadges").checked = !!readConfigValue(config, "EnableAvailabilityBadges", true);
-          document.querySelector("#EnableInstantResolvedPlayback").checked = !!readConfigValue(config, "EnableInstantResolvedPlayback", false);
-          document.querySelector("#EnableRetreivrDownloadActions").checked = !!readConfigValue(config, "EnableRetreivrDownloadActions", true);
-          document.querySelector("#RequestTimeoutSeconds").value = Number(readConfigValue(config, "RequestTimeoutSeconds", 5) || 5);
+    const apiFetch = async (path, options = {}) => {
+      const response = await fetch(path, options);
+      let payload = null;
+      try {
+        payload = await response.json();
+      } catch (_err) {
+        payload = null;
+      }
+      if (!response.ok) {
+        const message = payload && payload.detail ? payload.detail : `HTTP ${response.status}`;
+        throw new Error(message);
+      }
+      return payload;
+    };
+
+    const coreBaseUrl = () => {
+      const config = state.config || {};
+      return String(readConfigValue(config, "RetreivrCoreBaseUrl", "") || "").trim().replace(/\/+$/, "");
+    };
+
+    const albumArtUrl = (releaseGroupMbid) => {
+      const base = coreBaseUrl();
+      if (!base || !releaseGroupMbid) {
+        return null;
+      }
+      return `${base}/api/music/album/art/${encodeURIComponent(releaseGroupMbid)}`;
+    };
+
+    const formatDuration = (seconds) => {
+      const total = Number(seconds || 0);
+      if (!Number.isFinite(total) || total <= 0) {
+        return "-";
+      }
+      const rounded = Math.round(total);
+      const minutes = Math.floor(rounded / 60);
+      const secs = rounded % 60;
+      return `${minutes}m ${String(secs).padStart(2, "0")}s`;
+    };
+
+    const normalizeTracks = (raw) => {
+      if (!Array.isArray(raw)) return [];
+      return raw.filter((item) => item && item.recording_mbid).map((item) => ({
+        recording_mbid: String(item.recording_mbid || "").trim(),
+        mb_release_id: String(item.release_mbid || item.mb_release_id || "").trim(),
+        mb_release_group_id: String(item.release_group_mbid || item.mb_release_group_id || "").trim(),
+        artist: String(item.artist || "").trim(),
+        track: String(item.track || "").trim(),
+        album: String(item.album || "").trim(),
+        release_year: String(item.release_year || "").trim(),
+        track_number: Number(item.track_number || 0) || null,
+        disc_number: Number(item.disc_number || 0) || null,
+        duration_ms: Number(item.duration_ms || 0) || null
+      }));
+    };
+
+    const pushView = () => {
+      if (state.currentView) {
+        state.viewStack.push(state.currentView);
+        byId("MusicSearchBack").style.display = "";
+      }
+    };
+
+    const popView = () => {
+      const previous = state.viewStack.pop() || null;
+      state.currentView = previous;
+      byId("MusicSearchBack").style.display = state.viewStack.length ? "" : "none";
+      if (previous) {
+        renderResults(previous);
+      }
+    };
+
+    const createThumb = (releaseGroupMbid) => {
+      const img = document.createElement("img");
+      img.className = "retreivr-thumb";
+      const url = albumArtUrl(releaseGroupMbid);
+      if (url) {
+        img.src = url;
+        img.alt = "Artwork";
+      } else {
+        img.classList.add("placeholder");
+      }
+      return img;
+    };
+
+    const createCard = ({ title, meta, ref, actions = [], releaseGroupMbid = "" }) => {
+      const card = document.createElement("div");
+      card.className = "retreivr-card";
+      card.appendChild(createThumb(releaseGroupMbid));
+
+      const main = document.createElement("div");
+      main.className = "retreivr-card-main";
+
+      const titleEl = document.createElement("div");
+      titleEl.className = "retreivr-card-title";
+      titleEl.textContent = title || "";
+      main.appendChild(titleEl);
+
+      const metaEl = document.createElement("div");
+      metaEl.className = "retreivr-card-meta";
+      metaEl.textContent = meta || "";
+      main.appendChild(metaEl);
+
+      const refEl = document.createElement("div");
+      refEl.className = "retreivr-card-ref";
+      refEl.textContent = ref || "";
+      main.appendChild(refEl);
+
+      const actionRow = document.createElement("div");
+      actionRow.className = "retreivr-row";
+      actions.forEach((button) => actionRow.appendChild(button));
+      main.appendChild(actionRow);
+
+      card.appendChild(main);
+      return { card, titleEl };
+    };
+
+    const createButton = (label, handler, isPrimary = false) => {
+      const button = document.createElement("button");
+      button.setAttribute("is", "emby-button");
+      button.type = "button";
+      button.className = isPrimary ? "raised button-submit" : "button-submit";
+      button.innerHTML = `<span>${label}</span>`;
+      button.addEventListener("click", handler);
+      return button;
+    };
+
+    const renderArtists = (artists) => {
+      const results = byId("MusicSearchResults");
+      results.innerHTML = "";
+      artists.forEach((artistItem) => {
+        const artistName = String(artistItem?.name || "").trim();
+        const artistMbid = String(artistItem?.artist_mbid || artistItem?.id || "").trim();
+        const button = createButton("View Albums", async () => {
+          pushView();
+          setMessage("MusicSearchMessage", `Loading albums for ${artistName}...`);
+          try {
+            const payload = await apiFetch(`/Plugins/Retreivr/music/albums/search?q=${encodeURIComponent(artistName)}&artist_mbid=${encodeURIComponent(artistMbid)}`);
+            state.currentView = { type: "albums", title: artistName, payload };
+            renderResults(state.currentView);
+            setMessage("MusicSearchMessage", `Loaded albums for ${artistName}.`);
+          } catch (err) {
+            setMessage("MusicSearchMessage", `Album lookup failed: ${err.message}`, true);
+          }
+        }, true);
+        const { card, titleEl } = createCard({
+          title: artistName,
+          meta: [artistItem?.country, artistItem?.disambiguation].filter(Boolean).join(" • "),
+          ref: artistMbid ? `MB: artist ${artistMbid}` : "MB: artist (unknown)",
+          actions: [button]
+        });
+        titleEl.addEventListener("click", () => button.click());
+        results.appendChild(card);
+      });
+    };
+
+    const renderAlbums = (albums) => {
+      const results = byId("MusicSearchResults");
+      results.innerHTML = "";
+      const entries = Array.isArray(albums) ? albums : (Array.isArray(albums?.album_candidates) ? albums.album_candidates : []);
+      entries.forEach((albumItem) => {
+        const releaseGroupMbid = String(albumItem?.release_group_mbid || albumItem?.release_group_id || albumItem?.album_id || "").trim();
+        const title = String(albumItem?.title || "").trim();
+        const artist = String(albumItem?.artist || albumItem?.artist_credit || "").trim();
+        const year = String(albumItem?.first_release_date || "").trim().slice(0, 4);
+        const viewTracks = createButton("View Tracks", async () => {
+          pushView();
+          setMessage("MusicSearchMessage", `Loading tracks for ${title || "album"}...`);
+          try {
+            const payload = await apiFetch(`/Plugins/Retreivr/music/albums/${encodeURIComponent(releaseGroupMbid)}/tracks`);
+            state.currentView = { type: "tracks", title, payload };
+            renderResults(state.currentView);
+            setMessage("MusicSearchMessage", `Loaded tracks for ${title || "album"}.`);
+          } catch (err) {
+            setMessage("MusicSearchMessage", `Track lookup failed: ${err.message}`, true);
+          }
+        });
+        const download = createButton("Download Album", async () => {
+          setMessage("MusicSearchMessage", `Queueing ${title || "album"}...`);
+          try {
+            const payload = await apiFetch(`/Plugins/Retreivr/music/albums/${encodeURIComponent(releaseGroupMbid)}/download`, { method: "POST" });
+            const queued = Number(payload?.tracks_enqueued || 0);
+            setMessage("MusicSearchMessage", queued > 0 ? `Album queued: ${queued} tracks.` : "Album request completed with 0 queued tracks.");
+          } catch (err) {
+            setMessage("MusicSearchMessage", `Album queue failed: ${err.message}`, true);
+          }
+        }, true);
+        const { card, titleEl } = createCard({
+          title,
+          meta: [artist, year ? `(${year})` : ""].filter(Boolean).join(" "),
+          ref: releaseGroupMbid ? `MB: release-group ${releaseGroupMbid}` : "MB: release-group (unknown)",
+          actions: [viewTracks, download],
+          releaseGroupMbid
+        });
+        titleEl.addEventListener("click", () => viewTracks.click());
+        results.appendChild(card);
+      });
+    };
+
+    const renderTracks = (tracksPayload) => {
+      const results = byId("MusicSearchResults");
+      results.innerHTML = "";
+      const tracks = normalizeTracks(tracksPayload?.tracks || tracksPayload);
+      tracks.sort((a, b) => (a.disc_number || 0) - (b.disc_number || 0) || (a.track_number || 0) - (b.track_number || 0));
+      tracks.forEach((trackItem) => {
+        const download = createButton("Download", async () => {
+          setMessage("MusicSearchMessage", `Queueing ${trackItem.track || "track"}...`);
+          try {
+            const payload = await apiFetch("/Plugins/Retreivr/music/enqueue", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                recording_mbid: trackItem.recording_mbid,
+                release_mbid: trackItem.mb_release_id || null,
+                release_group_mbid: trackItem.mb_release_group_id || null,
+                artist: trackItem.artist || null,
+                track: trackItem.track || null,
+                album: trackItem.album || null,
+                release_year: trackItem.release_year || null,
+                track_number: trackItem.track_number || null,
+                disc_number: trackItem.disc_number || null,
+                duration_ms: trackItem.duration_ms || null,
+                media_mode: "music"
+              })
+            });
+            setMessage("MusicSearchMessage", payload?.created ? "Track queued." : `Track not queued${payload?.dedupe_reason ? ` (${payload.dedupe_reason})` : ""}.`);
+          } catch (err) {
+            setMessage("MusicSearchMessage", `Track queue failed: ${err.message}`, true);
+          }
+        }, true);
+        const trackLabel = trackItem.track_number ? `${String(trackItem.track_number).padStart(2, "0")}. ${trackItem.track}` : trackItem.track;
+        const { card } = createCard({
+          title: trackLabel,
+          meta: `${trackItem.artist || ""} • ${formatDuration((trackItem.duration_ms || 0) / 1000)}`,
+          ref: trackItem.recording_mbid ? `MB: rec ${trackItem.recording_mbid}` : "MB: rec (unknown)",
+          actions: [download],
+          releaseGroupMbid: trackItem.mb_release_group_id
+        });
+        results.appendChild(card);
+      });
+    };
+
+    const renderResults = (view) => {
+      if (!view) return;
+      if (view.type === "artists") {
+        renderArtists(Array.isArray(view.payload?.artists) ? view.payload.artists : []);
+        return;
+      }
+      if (view.type === "albums") {
+        renderAlbums(view.payload);
+        return;
+      }
+      if (view.type === "tracks") {
+        renderTracks(view.payload);
+      }
+    };
+
+    const loadStatus = async () => {
+      const statusEl = byId("RetreivrStatus");
+      statusEl.textContent = "Loading...";
+      try {
+        const payload = await apiFetch("/Plugins/Retreivr/status");
+        const lines = [
+          `Resolution API: ${payload.resolutionApiHealthy ? "reachable" : "unreachable"}`,
+          payload.resolutionApiBaseUrl ? `Resolution URL: ${payload.resolutionApiBaseUrl}` : "Resolution URL: not configured",
+          payload.resolutionApiError ? `Resolution Error: ${payload.resolutionApiError}` : "",
+          `Retreivr Core: ${payload.retreivrCoreHealthy ? "reachable" : "unreachable"}`,
+          payload.retreivrCoreBaseUrl ? `Core URL: ${payload.retreivrCoreBaseUrl}` : "Core URL: not configured",
+          payload.retreivrCoreError ? `Core Error: ${payload.retreivrCoreError}` : "",
+        ].filter(Boolean);
+        statusEl.textContent = lines.join("\n");
+      } catch (err) {
+        statusEl.textContent = `Status check failed: ${err.message}`;
+      }
+    };
+
+    const loadConfig = () => ApiClient.getPluginConfiguration(pluginId).then((config) => {
+      state.config = config;
+      byId("ResolutionApiBaseUrl").value = readConfigValue(config, "ResolutionApiBaseUrl", "http://localhost:8000") || "";
+      byId("ResolutionApiKey").value = readConfigValue(config, "ResolutionApiKey", "") || "";
+      byId("RetreivrCoreBaseUrl").value = readConfigValue(config, "RetreivrCoreBaseUrl", "http://localhost:8000") || "";
+      byId("RetreivrCoreApiKey").value = readConfigValue(config, "RetreivrCoreApiKey", "") || "";
+      byId("EnableAvailabilityBadges").checked = !!readConfigValue(config, "EnableAvailabilityBadges", true);
+      byId("EnableInstantResolvedPlayback").checked = !!readConfigValue(config, "EnableInstantResolvedPlayback", false);
+      byId("EnableRetreivrDownloadActions").checked = !!readConfigValue(config, "EnableRetreivrDownloadActions", true);
+      byId("RequestTimeoutSeconds").value = Number(readConfigValue(config, "RequestTimeoutSeconds", 5) || 5);
+      return config;
+    });
+
+    const performSearch = async () => {
+      const artist = byId("MusicSearchArtist").value.trim();
+      const album = byId("MusicSearchAlbum").value.trim();
+      const track = byId("MusicSearchTrack").value.trim();
+      const mode = byId("MusicSearchMode").value || "auto";
+      setMessage("MusicSearchMessage", "Searching MusicBrainz metadata via Retreivr...");
+      try {
+        const payload = await apiFetch(`/Plugins/Retreivr/music/search?artist=${encodeURIComponent(artist)}&album=${encodeURIComponent(album)}&track=${encodeURIComponent(track)}&mode=${encodeURIComponent(mode)}`);
+        state.viewStack = [];
+        byId("MusicSearchBack").style.display = "none";
+        state.currentView = {
+          type: Array.isArray(payload?.artists) && payload.artists.length ? "artists" : Array.isArray(payload?.albums) && payload.albums.length ? "albums" : "tracks",
+          payload
+        };
+        renderResults(state.currentView);
+        setMessage("MusicSearchMessage", "Search complete.");
+      } catch (err) {
+        setMessage("MusicSearchMessage", `Search failed: ${err.message}`, true);
+      }
+    };
+
+    byId("RetreivrConfigPage").addEventListener("pageshow", function () {
+      Dashboard.showLoadingMsg();
+      loadConfig().then(loadStatus).finally(() => Dashboard.hideLoadingMsg());
+    });
+
+    byId("RetreivrConfigForm").addEventListener("submit", function (event) {
+      event.preventDefault();
+      Dashboard.showLoadingMsg();
+      ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+        const resolutionApiBaseUrl = byId("ResolutionApiBaseUrl").value;
+        const resolutionApiKey = byId("ResolutionApiKey").value;
+        const retreivrCoreBaseUrl = byId("RetreivrCoreBaseUrl").value;
+        const retreivrCoreApiKey = byId("RetreivrCoreApiKey").value;
+        const enableAvailabilityBadges = byId("EnableAvailabilityBadges").checked;
+        const enableInstantResolvedPlayback = byId("EnableInstantResolvedPlayback").checked;
+        const enableRetreivrDownloadActions = byId("EnableRetreivrDownloadActions").checked;
+        const requestTimeoutSeconds = parseInt(byId("RequestTimeoutSeconds").value || "5", 10);
+
+        config.ResolutionApiBaseUrl = resolutionApiBaseUrl;
+        config.resolutionApiBaseUrl = resolutionApiBaseUrl;
+        config.ResolutionApiKey = resolutionApiKey;
+        config.resolutionApiKey = resolutionApiKey;
+        config.RetreivrCoreBaseUrl = retreivrCoreBaseUrl;
+        config.retreivrCoreBaseUrl = retreivrCoreBaseUrl;
+        config.RetreivrCoreApiKey = retreivrCoreApiKey;
+        config.retreivrCoreApiKey = retreivrCoreApiKey;
+        config.EnableAvailabilityBadges = enableAvailabilityBadges;
+        config.enableAvailabilityBadges = enableAvailabilityBadges;
+        config.EnableInstantResolvedPlayback = enableInstantResolvedPlayback;
+        config.enableInstantResolvedPlayback = enableInstantResolvedPlayback;
+        config.EnableRetreivrDownloadActions = enableRetreivrDownloadActions;
+        config.enableRetreivrDownloadActions = enableRetreivrDownloadActions;
+        config.RequestTimeoutSeconds = requestTimeoutSeconds;
+        config.requestTimeoutSeconds = requestTimeoutSeconds;
+
+        return ApiClient.updatePluginConfiguration(pluginId, config);
+      }).then(function () {
+        setMessage("RetreivrConfigMessage", "Settings saved.");
+        return loadConfig().then(loadStatus);
+      }).then(Dashboard.processPluginConfigurationUpdateResult)
+        .catch(function (err) {
+          setMessage("RetreivrConfigMessage", `Save failed: ${err.message}`, true);
           Dashboard.hideLoadingMsg();
         });
-      });
+    });
 
-    document.querySelector("#RetreivrConfigForm")
-      .addEventListener("submit", function (event) {
-        event.preventDefault();
-        Dashboard.showLoadingMsg();
-        ApiClient.getPluginConfiguration(pluginId).then(function (config) {
-          const resolutionApiBaseUrl = document.querySelector("#ResolutionApiBaseUrl").value;
-          const resolutionApiKey = document.querySelector("#ResolutionApiKey").value;
-          const retreivrCoreBaseUrl = document.querySelector("#RetreivrCoreBaseUrl").value;
-          const retreivrCoreApiKey = document.querySelector("#RetreivrCoreApiKey").value;
-          const enableAvailabilityBadges = document.querySelector("#EnableAvailabilityBadges").checked;
-          const enableInstantResolvedPlayback = document.querySelector("#EnableInstantResolvedPlayback").checked;
-          const enableRetreivrDownloadActions = document.querySelector("#EnableRetreivrDownloadActions").checked;
-          const requestTimeoutSeconds = parseInt(document.querySelector("#RequestTimeoutSeconds").value || "5", 10);
-
-          config.ResolutionApiBaseUrl = resolutionApiBaseUrl;
-          config.resolutionApiBaseUrl = resolutionApiBaseUrl;
-          config.ResolutionApiKey = resolutionApiKey;
-          config.resolutionApiKey = resolutionApiKey;
-          config.RetreivrCoreBaseUrl = retreivrCoreBaseUrl;
-          config.retreivrCoreBaseUrl = retreivrCoreBaseUrl;
-          config.RetreivrCoreApiKey = retreivrCoreApiKey;
-          config.retreivrCoreApiKey = retreivrCoreApiKey;
-          config.EnableAvailabilityBadges = enableAvailabilityBadges;
-          config.enableAvailabilityBadges = enableAvailabilityBadges;
-          config.EnableInstantResolvedPlayback = enableInstantResolvedPlayback;
-          config.enableInstantResolvedPlayback = enableInstantResolvedPlayback;
-          config.EnableRetreivrDownloadActions = enableRetreivrDownloadActions;
-          config.enableRetreivrDownloadActions = enableRetreivrDownloadActions;
-          config.RequestTimeoutSeconds = requestTimeoutSeconds;
-          config.requestTimeoutSeconds = requestTimeoutSeconds;
-          ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);
-        });
-      });
+    byId("RetreivrRefreshStatus").addEventListener("click", () => loadStatus());
+    byId("RetreivrOpenUi").addEventListener("click", () => {
+      const url = coreBaseUrl();
+      if (!url) {
+        setMessage("RetreivrConfigMessage", "Retreivr Core Base URL is not configured.", true);
+        return;
+      }
+      window.open(url, "_blank", "noopener");
+    });
+    byId("MusicSearchSubmit").addEventListener("click", () => performSearch());
+    byId("MusicSearchBack").addEventListener("click", () => popView());
   </script>
 </body>
 </html>
