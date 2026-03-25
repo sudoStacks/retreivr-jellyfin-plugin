@@ -42,22 +42,22 @@ jobs:
           sed -i "s#<FileVersion>.*</FileVersion>#<FileVersion>${VERSION}</FileVersion>#" Directory.Build.props
           sed -i "s#version: \".*\"#version: \"${VERSION}\"#" build.yaml
           python3 - <<'PY'
-from pathlib import Path
-import json
-from datetime import datetime, timezone
+          from pathlib import Path
+          import json
+          from datetime import datetime, timezone
 
-manifest_path = Path("manifest.json")
-payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-entry = payload[0]
-version = "${{ steps.version.outputs.version }}"
-versions = entry.get("versions") or [{}]
-item = versions[0]
-item["version"] = version
-item["timestamp"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-item["sourceUrl"] = "https://github.com/sudoStacks/retreivr-jellyfin-plugin/releases/latest/download/Retreivr.Jellyfin.Plugin.zip"
-entry["versions"] = [item]
-manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-PY
+          manifest_path = Path("manifest.json")
+          payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+          entry = payload[0]
+          version = "${{ steps.version.outputs.version }}"
+          versions = entry.get("versions") or [{}]
+          item = versions[0]
+          item["version"] = version
+          item["timestamp"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+          item["sourceUrl"] = "https://github.com/sudoStacks/retreivr-jellyfin-plugin/releases/latest/download/Retreivr.Jellyfin.Plugin.zip"
+          entry["versions"] = [item]
+          manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+          PY
 
       - name: Update manifest on main
         shell: bash
