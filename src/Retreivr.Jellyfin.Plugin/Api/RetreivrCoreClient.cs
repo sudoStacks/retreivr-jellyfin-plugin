@@ -46,7 +46,7 @@ public sealed class RetreivrCoreClient
     /// Check Retreivr Core health.
     /// </summary>
     public Task<JsonDocument?> GetHealthAsync(CancellationToken cancellationToken = default)
-        => GetJsonAsync("health", cancellationToken);
+        => GetJsonAsync<JsonDocument>("health", cancellationToken);
 
     /// <summary>
     /// Proxy MusicBrainz-backed music search.
@@ -54,7 +54,7 @@ public sealed class RetreivrCoreClient
     public Task<JsonDocument?> SearchMusicAsync(string artist, string album, string track, string mode, CancellationToken cancellationToken = default)
     {
         var query = $"api/music/search?artist={Uri.EscapeDataString(artist ?? string.Empty)}&album={Uri.EscapeDataString(album ?? string.Empty)}&track={Uri.EscapeDataString(track ?? string.Empty)}&mode={Uri.EscapeDataString(mode ?? "auto")}&offset=0&limit=100";
-        return GetJsonAsync(query, cancellationToken);
+        return GetJsonAsync<JsonDocument>(query, cancellationToken);
     }
 
     /// <summary>
@@ -68,14 +68,14 @@ public sealed class RetreivrCoreClient
             url += $"&artist_mbid={Uri.EscapeDataString(artistMbid)}";
         }
 
-        return GetJsonAsync(url, cancellationToken);
+        return GetJsonAsync<JsonDocument>(url, cancellationToken);
     }
 
     /// <summary>
     /// Fetch track listing for a release group.
     /// </summary>
     public Task<JsonDocument?> GetAlbumTracksAsync(string releaseGroupMbid, CancellationToken cancellationToken = default)
-        => GetJsonAsync($"api/music/albums/{Uri.EscapeDataString(releaseGroupMbid)}/tracks?limit=200", cancellationToken);
+        => GetJsonAsync<JsonDocument>($"api/music/albums/{Uri.EscapeDataString(releaseGroupMbid)}/tracks?limit=200", cancellationToken);
 
     /// <summary>
     /// Queue a full album in Retreivr Core.

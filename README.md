@@ -115,13 +115,15 @@ With the current plugin page, you can already:
 - manual builds are available through `workflow_dispatch`
 - tags matching `v*` build and package the plugin automatically
 - the release workflow stamps the assembly/build manifest version from the tag before packaging
-- the repository manifest is at `manifest.json` and is intended to be served from the repo root on `main`
+- the release workflow rewrites `main/manifest.json` on every tagged release so it always points at the newest versioned release asset and checksum
 
 ## Jellyfin Repository URL
 
-Once the GitHub repo exists at `sudoStacks/retreivr-jellyfin-plugin`, the repository URL to paste into Jellyfin will be:
+Use this stable repository URL in Jellyfin:
 
 `https://raw.githubusercontent.com/sudoStacks/retreivr-jellyfin-plugin/main/manifest.json`
+
+Do not use a versioned release-asset manifest URL in Jellyfin. The stable `main/manifest.json` file is the contract, and each tagged release updates that file to the newest plugin package automatically.
 
 Installation path in Jellyfin:
 

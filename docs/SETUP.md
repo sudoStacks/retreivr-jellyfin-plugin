@@ -48,6 +48,14 @@ For the common single-node setup:
 
 Leave the API key fields blank unless you explicitly enabled auth on the Retreivr server.
 
+## Jellyfin Repository URL
+
+Add this repository URL in Jellyfin:
+
+- `https://raw.githubusercontent.com/sudoStacks/retreivr-jellyfin-plugin/main/manifest.json`
+
+This file is intentionally stable. Each tagged plugin release updates `main/manifest.json` so it always points at the latest versioned plugin zip and checksum.
+
 ## Health Checks
 
 Before testing the plugin, confirm these endpoints load from the Jellyfin host:
