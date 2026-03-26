@@ -46,7 +46,6 @@ public sealed class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                 Name = Name,
                 DisplayName = "Retreivr",
                 EnableInMainMenu = true,
-                EnableInUserMenu = true,
                 MenuSection = "server",
                 MenuIcon = "library_music",
                 EmbeddedResourcePath = string.Format(
