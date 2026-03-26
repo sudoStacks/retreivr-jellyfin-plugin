@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented here.
 
+## v0.1.8 — Config Page Initialization Hardening
+
+### High-Level
+This release hardens the Jellyfin plugin dashboard page initialization path so the embedded UI can reliably bind events, load current configuration, and execute save/open actions under Jellyfin’s SPA page lifecycle.
+
+### Changed
+- Plugin release metadata and packaging are now aligned to `v0.1.8`.
+
+### Fixed
+- Config page initialization now retries safely across Jellyfin page-load timing paths instead of assuming immediate DOM availability.
+- `Save Settings`, `Refresh Status`, and `Open Retreivr UI` now bind through a more resilient initialization flow.
+- Retreivr Core URLs entered without a scheme are normalized before use in page actions.
+
 ## v0.1.5 — Configuration Persistence + Live Plugin Wiring
 
 ### High-Level

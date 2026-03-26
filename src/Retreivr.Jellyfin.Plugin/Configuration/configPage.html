@@ -646,6 +646,18 @@
 
     const byId = (id) => document.getElementById(id);
 
+    const showLoading = () => {
+      if (window.Dashboard && typeof window.Dashboard.showLoadingMsg === "function") {
+        window.Dashboard.showLoadingMsg();
+      }
+    };
+
+    const hideLoading = () => {
+      if (window.Dashboard && typeof window.Dashboard.hideLoadingMsg === "function") {
+        window.Dashboard.hideLoadingMsg();
+      }
+    };
+
     const normalizeBaseUrl = (value) => {
       const raw = String(value || "").trim();
       if (!raw) {
@@ -1117,44 +1129,84 @@
       }
     };
 
-    byId("RetreivrConfigPage").addEventListener("pageshow", () => {
-      Dashboard.showLoadingMsg();
-      Promise.resolve()
-        .then(loadConfig)
-        .then(loadStatus)
-        .finally(() => Dashboard.hideLoadingMsg());
-    });
+    const refreshPage = async () => {
+      showLoading();
+      try {
+        await loadConfig();
+        await loadStatus();
+      } catch (err) {
+        setMessage("RetreivrConfigMessage", `Load failed: ${err.message}`, true);
+      } finally {
+        hideLoading();
+      }
+    };
 
-    byId("RetreivrConfigForm").addEventListener("submit", (event) => {
-      event.preventDefault();
-      Dashboard.showLoadingMsg();
-      setMessage("RetreivrConfigMessage", "");
-      Promise.resolve()
-        .then(saveConfig)
-        .finally(() => Dashboard.hideLoadingMsg())
-        .catch((err) => {
-          setMessage("RetreivrConfigMessage", `Save failed: ${err.message}`, true);
-        });
-      return false;
-    });
-
-    byId("RetreivrRefreshStatus").addEventListener("click", () => {
-      setMessage("RetreivrConfigMessage", "");
-      loadStatus();
-    });
-
-    byId("RetreivrOpenUi").addEventListener("click", () => {
-      const url = coreBaseUrl();
-      if (!url) {
-        setMessage("RetreivrConfigMessage", "Retreivr Core base URL is not configured.", true);
-        return;
+    const initializePage = () => {
+      if (state.uiReady) {
+        return true;
       }
 
-      window.open(url, "_blank", "noopener");
-    });
+      const page = byId("RetreivrConfigPage");
+      const form = byId("RetreivrConfigForm");
+      const refreshButton = byId("RetreivrRefreshStatus");
+      const openButton = byId("RetreivrOpenUi");
+      const searchButton = byId("MusicSearchSubmit");
+      const backButton = byId("MusicSearchBack");
 
-    byId("MusicSearchSubmit").addEventListener("click", () => performSearch());
-    byId("MusicSearchBack").addEventListener("click", () => popView());
+      if (!page || !form || !refreshButton || !openButton || !searchButton || !backButton) {
+        return false;
+      }
+
+      page.addEventListener("pageshow", () => {
+        refreshPage();
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        showLoading();
+        setMessage("RetreivrConfigMessage", "");
+        Promise.resolve()
+          .then(saveConfig)
+          .catch((err) => {
+            setMessage("RetreivrConfigMessage", `Save failed: ${err.message}`, true);
+          })
+          .finally(() => {
+            hideLoading();
+          });
+        return false;
+      });
+
+      refreshButton.addEventListener("click", () => {
+        setMessage("RetreivrConfigMessage", "");
+        loadStatus().catch((err) => {
+          setMessage("RetreivrConfigMessage", `Status refresh failed: ${err.message}`, true);
+        });
+      });
+
+      openButton.addEventListener("click", () => {
+        const configured = normalizeBaseUrl(byId("RetreivrCoreBaseUrl")?.value || coreBaseUrl());
+        if (!configured) {
+          setMessage("RetreivrConfigMessage", "Retreivr Core base URL is not configured.", true);
+          return;
+        }
+
+        window.open(configured, "_blank", "noopener");
+      });
+
+      searchButton.addEventListener("click", () => performSearch());
+      backButton.addEventListener("click", () => popView());
+
+      state.uiReady = true;
+      refreshPage();
+      return true;
+    };
+
+    if (!initializePage()) {
+      document.addEventListener("DOMContentLoaded", initializePage, { once: true });
+      window.addEventListener("load", initializePage, { once: true });
+      window.setTimeout(initializePage, 0);
+      window.setTimeout(initializePage, 300);
+    }
   </script>
 </body>
 </html>
