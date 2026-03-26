@@ -372,7 +372,7 @@
   </style>
 </head>
 <body>
-  <div id="RetreivrConfigPage" data-role="page" class="page type-interior pluginConfigurationPage MainPluginConfigurationPage">
+  <div id="RetreivrConfigPage" data-role="page" class="page type-interior pluginConfigurationPage MainPluginConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox">
     <div data-role="content">
       <div class="content-primary retreivr-shell">
         <section class="retreivr-hero">
@@ -415,37 +415,37 @@
             </div>
           </div>
 
-          <div id="RetreivrConfigForm" class="retreivr-form-grid">
+          <form id="RetreivrConfigForm" class="retreivr-form-grid">
             <div class="retreivr-config-grid">
               <div class="retreivr-field">
                 <label for="ResolutionApiBaseUrl">Resolution API base URL</label>
-                <input id="ResolutionApiBaseUrl" name="ResolutionApiBaseUrl" type="text" placeholder="http://retreivr.local:8000" />
+                <input id="ResolutionApiBaseUrl" name="ResolutionApiBaseUrl" type="text" is="emby-input" placeholder="http://retreivr.local:8000" />
               </div>
 
               <div class="retreivr-field">
                 <label for="ResolutionApiKey">Resolution API key</label>
-                <input id="ResolutionApiKey" name="ResolutionApiKey" type="password" placeholder="Optional bearer token" />
+                <input id="ResolutionApiKey" name="ResolutionApiKey" type="password" is="emby-input" placeholder="Optional bearer token" />
               </div>
 
               <div class="retreivr-field">
                 <label for="RetreivrCoreBaseUrl">Retreivr Core base URL</label>
-                <input id="RetreivrCoreBaseUrl" name="RetreivrCoreBaseUrl" type="text" placeholder="http://retreivr.local:8000" />
+                <input id="RetreivrCoreBaseUrl" name="RetreivrCoreBaseUrl" type="text" is="emby-input" placeholder="http://retreivr.local:8000" />
               </div>
 
               <div class="retreivr-field">
                 <label for="RetreivrCoreApiKey">Retreivr Core API key</label>
-                <input id="RetreivrCoreApiKey" name="RetreivrCoreApiKey" type="password" placeholder="Optional bearer token" />
+                <input id="RetreivrCoreApiKey" name="RetreivrCoreApiKey" type="password" is="emby-input" placeholder="Optional bearer token" />
               </div>
 
               <div class="retreivr-field">
                 <label for="RequestTimeoutSeconds">Request timeout seconds</label>
-                <input id="RequestTimeoutSeconds" name="RequestTimeoutSeconds" type="number" min="1" step="1" />
+                <input id="RequestTimeoutSeconds" name="RequestTimeoutSeconds" type="number" is="emby-input" min="1" step="1" />
               </div>
             </div>
 
             <div class="retreivr-toggle-grid">
               <label class="retreivr-toggle">
-                <input id="EnableAvailabilityBadges" name="EnableAvailabilityBadges" type="checkbox" />
+                <input id="EnableAvailabilityBadges" name="EnableAvailabilityBadges" type="checkbox" is="emby-checkbox" />
                 <span class="retreivr-toggle-copy">
                   <span class="retreivr-toggle-label">Availability badges</span>
                   <span>Keep resolution/availability signals enabled for future Jellyfin item integrations.</span>
@@ -453,7 +453,7 @@
               </label>
 
               <label class="retreivr-toggle">
-                <input id="EnableInstantResolvedPlayback" name="EnableInstantResolvedPlayback" type="checkbox" />
+                <input id="EnableInstantResolvedPlayback" name="EnableInstantResolvedPlayback" type="checkbox" is="emby-checkbox" />
                 <span class="retreivr-toggle-copy">
                   <span class="retreivr-toggle-label">Instant resolved playback</span>
                   <span>Preserve the toggle now so playback interception can be wired without changing saved config later.</span>
@@ -461,7 +461,7 @@
               </label>
 
               <label class="retreivr-toggle">
-                <input id="EnableRetreivrDownloadActions" name="EnableRetreivrDownloadActions" type="checkbox" />
+                <input id="EnableRetreivrDownloadActions" name="EnableRetreivrDownloadActions" type="checkbox" is="emby-checkbox" />
                 <span class="retreivr-toggle-copy">
                   <span class="retreivr-toggle-label">Download actions</span>
                   <span>Allow album and track queue buttons to dispatch acquisition work directly to Retreivr Core.</span>
@@ -470,12 +470,12 @@
             </div>
 
             <div class="retreivr-actions">
-              <button is="emby-button" id="RetreivrSaveConfig" type="button" class="raised button-submit">
+              <button is="emby-button" id="RetreivrSaveConfig" type="submit" class="raised button-submit block emby-button">
                 <span>Save Settings</span>
               </button>
             </div>
             <div id="RetreivrConfigMessage" class="retreivr-message"></div>
-          </div>
+          </form>
         </section>
 
         <section class="retreivr-panel">
@@ -698,22 +698,23 @@
     };
 
     const loadConfig = async () => {
-      const config = await apiFetch("/Plugins/Retreivr/config", { cache: "no-store" });
+      const config = await ApiClient.getPluginConfiguration(pluginId);
       applyConfig(config || defaults);
       return state.config;
     };
 
     const saveConfig = async () => {
       const config = collectConfig();
-      const result = await apiFetch("/Plugins/Retreivr/config", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(config)
-      });
+      const persisted = await ApiClient.getPluginConfiguration(pluginId);
+      const nextConfig = {
+        ...persisted,
+        ...config
+      };
 
-      applyConfig(result || config);
+      const result = await ApiClient.updatePluginConfiguration(pluginId, nextConfig);
+      Dashboard.processPluginConfigurationUpdateResult(result);
+
+      applyConfig(nextConfig);
       setMessage("RetreivrConfigMessage", "Settings saved.");
       await loadStatus();
     };
@@ -1036,7 +1037,8 @@
         .finally(() => Dashboard.hideLoadingMsg());
     });
 
-    byId("RetreivrSaveConfig").addEventListener("click", () => {
+    byId("RetreivrConfigForm").addEventListener("submit", (event) => {
+      event.preventDefault();
       Dashboard.showLoadingMsg();
       setMessage("RetreivrConfigMessage", "");
       Promise.resolve()
@@ -1045,6 +1047,7 @@
         .catch((err) => {
           setMessage("RetreivrConfigMessage", `Save failed: ${err.message}`, true);
         });
+      return false;
     });
 
     byId("RetreivrRefreshStatus").addEventListener("click", () => {
