@@ -9,5 +9,5 @@ public sealed class PluginConfigurationProvider
     /// Get the current plugin configuration.
     /// </summary>
     public PluginConfiguration GetCurrent()
-        => Plugin.Instance?.Configuration ?? new PluginConfiguration();
+        => Plugin.Instance?.GetEffectiveConfiguration() ?? new PluginConfiguration();
 }

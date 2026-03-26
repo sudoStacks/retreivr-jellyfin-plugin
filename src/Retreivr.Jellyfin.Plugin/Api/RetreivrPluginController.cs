@@ -47,7 +47,7 @@ public sealed class RetreivrPluginController : ControllerBase
     [HttpGet("health")]
     public ActionResult<object> GetHealth()
     {
-        var config = Plugin.Instance?.Configuration;
+        var config = Plugin.Instance?.GetEffectiveConfiguration();
         return Ok(new
         {
             plugin = "Retreivr",
@@ -65,7 +65,7 @@ public sealed class RetreivrPluginController : ControllerBase
     [HttpGet("config")]
     public ActionResult<PluginConfiguration> GetConfig()
     {
-        return Ok(Plugin.Instance?.Configuration ?? new PluginConfiguration());
+        return Ok(Plugin.Instance?.GetEffectiveConfiguration() ?? new PluginConfiguration());
     }
 
     /// <summary>
@@ -80,15 +80,15 @@ public sealed class RetreivrPluginController : ControllerBase
         }
 
         configuration ??= new PluginConfiguration();
-        Plugin.Instance.UpdateConfiguration(configuration);
+        var persisted = Plugin.Instance.PersistConfiguration(configuration);
         _logger.LogInformation(
             "Retreivr plugin config saved resolutionApiBaseUrl={ResolutionApiBaseUrl} retreivrCoreBaseUrl={RetreivrCoreBaseUrl} availabilityBadges={EnableAvailabilityBadges} instantPlayback={EnableInstantResolvedPlayback} downloadActions={EnableRetreivrDownloadActions}",
-            configuration.ResolutionApiBaseUrl,
-            configuration.RetreivrCoreBaseUrl,
-            configuration.EnableAvailabilityBadges,
-            configuration.EnableInstantResolvedPlayback,
-            configuration.EnableRetreivrDownloadActions);
-        return Ok(Plugin.Instance.Configuration);
+            persisted.ResolutionApiBaseUrl,
+            persisted.RetreivrCoreBaseUrl,
+            persisted.EnableAvailabilityBadges,
+            persisted.EnableInstantResolvedPlayback,
+            persisted.EnableRetreivrDownloadActions);
+        return Ok(persisted);
     }
 
     /// <summary>
@@ -97,7 +97,7 @@ public sealed class RetreivrPluginController : ControllerBase
     [HttpGet("status")]
     public async Task<ActionResult<object>> GetStatusAsync(CancellationToken cancellationToken)
     {
-        var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+        var config = Plugin.Instance?.GetEffectiveConfiguration() ?? new PluginConfiguration();
         var resolutionHealthy = false;
         var coreHealthy = false;
         string? resolutionError = null;
