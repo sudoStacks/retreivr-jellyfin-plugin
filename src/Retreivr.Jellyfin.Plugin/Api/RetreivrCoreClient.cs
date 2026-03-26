@@ -20,15 +20,15 @@ public sealed class RetreivrCoreClient
     };
 
     private readonly HttpClient _httpClient;
-    private readonly PluginConfiguration _configuration;
+    private readonly PluginConfigurationProvider _configurationProvider;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RetreivrCoreClient"/> class.
     /// </summary>
-    public RetreivrCoreClient(HttpClient httpClient, PluginConfiguration configuration)
+    public RetreivrCoreClient(HttpClient httpClient, PluginConfigurationProvider configurationProvider)
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _configurationProvider = configurationProvider ?? throw new ArgumentNullException(nameof(configurationProvider));
     }
 
     /// <summary>
@@ -94,7 +94,8 @@ public sealed class RetreivrCoreClient
     /// </summary>
     public string? GetConfiguredBaseUrl()
     {
-        var baseUrl = (_configuration.RetreivrCoreBaseUrl ?? string.Empty).Trim().TrimEnd('/');
+        var configuration = _configurationProvider.GetCurrent();
+        var baseUrl = (configuration.RetreivrCoreBaseUrl ?? string.Empty).Trim().TrimEnd('/');
         return string.IsNullOrWhiteSpace(baseUrl) ? null : baseUrl;
     }
 
@@ -109,16 +110,17 @@ public sealed class RetreivrCoreClient
 
     private async Task<T?> SendAsync<T>(HttpMethod method, string relativePath, HttpContent? content, CancellationToken cancellationToken)
     {
-        var baseUrl = (_configuration.RetreivrCoreBaseUrl ?? string.Empty).Trim().TrimEnd('/');
+        var configuration = _configurationProvider.GetCurrent();
+        var baseUrl = (configuration.RetreivrCoreBaseUrl ?? string.Empty).Trim().TrimEnd('/');
         if (string.IsNullOrWhiteSpace(baseUrl))
         {
             return default;
         }
 
         using var request = new HttpRequestMessage(method, $"{baseUrl}/{relativePath}");
-        if (!string.IsNullOrWhiteSpace(_configuration.RetreivrCoreApiKey))
+        if (!string.IsNullOrWhiteSpace(configuration.RetreivrCoreApiKey))
         {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _configuration.RetreivrCoreApiKey);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", configuration.RetreivrCoreApiKey);
         }
 
         if (content is not null)
@@ -127,7 +129,7 @@ public sealed class RetreivrCoreClient
         }
 
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeoutCts.CancelAfter(TimeSpan.FromSeconds(Math.Max(1, _configuration.RequestTimeoutSeconds)));
+        timeoutCts.CancelAfter(TimeSpan.FromSeconds(Math.Max(1, configuration.RequestTimeoutSeconds)));
 
         using var response = await _httpClient.SendAsync(request, timeoutCts.Token).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();

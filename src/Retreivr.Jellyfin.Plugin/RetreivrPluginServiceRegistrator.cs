@@ -2,6 +2,7 @@ using MediaBrowser.Controller;
 using MediaBrowser.Controller.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Retreivr.Jellyfin.Plugin.Api;
+using Retreivr.Jellyfin.Plugin.Configuration;
 using Retreivr.Jellyfin.Plugin.Services;
 
 namespace Retreivr.Jellyfin.Plugin;
@@ -16,7 +17,7 @@ public sealed class RetreivrPluginServiceRegistrator : IPluginServiceRegistrator
     {
         serviceCollection.AddHttpClient<ResolutionApiClient>();
         serviceCollection.AddHttpClient<RetreivrCoreClient>();
-        serviceCollection.AddSingleton(provider => Plugin.Instance?.Configuration ?? new Configuration.PluginConfiguration());
+        serviceCollection.AddSingleton<PluginConfigurationProvider>();
         serviceCollection.AddSingleton<ResolutionAvailabilityService>();
         serviceCollection.AddSingleton<RetreivrDownloadService>();
     }

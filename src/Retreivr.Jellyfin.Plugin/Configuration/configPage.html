@@ -4,70 +4,311 @@
   <meta charset="utf-8" />
   <title>Retreivr</title>
   <style>
-    .retreivr-page {
+    :root {
+      --retreivr-bg: linear-gradient(180deg, rgba(18, 24, 33, 0.96) 0%, rgba(12, 16, 23, 0.98) 100%);
+      --retreivr-panel: rgba(255, 255, 255, 0.04);
+      --retreivr-panel-strong: rgba(255, 255, 255, 0.06);
+      --retreivr-border: rgba(255, 255, 255, 0.1);
+      --retreivr-text: #f5f7fa;
+      --retreivr-text-soft: rgba(245, 247, 250, 0.76);
+      --retreivr-text-muted: rgba(245, 247, 250, 0.56);
+      --retreivr-accent: #4fc3a1;
+      --retreivr-accent-strong: #25d3a2;
+      --retreivr-warn: #ff8f6b;
+      --retreivr-danger: #ff7d7d;
+      --retreivr-shadow: 0 18px 48px rgba(0, 0, 0, 0.25);
+    }
+
+    .retreivr-shell {
       display: flex;
       flex-direction: column;
       gap: 24px;
+      padding-bottom: 32px;
+      color: var(--retreivr-text);
     }
 
-    .retreivr-group {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 18px;
+    .retreivr-hero,
+    .retreivr-panel {
+      background: var(--retreivr-bg);
+      border: 1px solid var(--retreivr-border);
+      border-radius: 22px;
+      box-shadow: var(--retreivr-shadow);
     }
 
-    .retreivr-grid {
+    .retreivr-hero {
+      padding: 28px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .retreivr-hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -40px -40px auto;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(37, 211, 162, 0.22) 0%, rgba(37, 211, 162, 0) 72%);
+      pointer-events: none;
+    }
+
+    .retreivr-hero-grid,
+    .retreivr-status-grid,
+    .retreivr-search-grid,
+    .retreivr-config-grid {
       display: grid;
-      gap: 12px 16px;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     }
 
-    .retreivr-row {
+    .retreivr-headline {
+      margin: 0;
+      font-size: 32px;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+    }
+
+    .retreivr-subhead,
+    .retreivr-body,
+    .retreivr-message,
+    .retreivr-status-text,
+    .retreivr-card-meta,
+    .retreivr-card-ref {
+      color: var(--retreivr-text-soft);
+    }
+
+    .retreivr-subhead {
+      font-size: 15px;
+      line-height: 1.7;
+      max-width: 760px;
+      margin: 12px 0 0;
+    }
+
+    .retreivr-hero-actions,
+    .retreivr-actions,
+    .retreivr-card-actions {
       display: flex;
-      gap: 10px;
       flex-wrap: wrap;
+      gap: 12px;
       align-items: center;
     }
 
-    .retreivr-status {
-      font-size: 14px;
-      line-height: 1.5;
-      white-space: pre-line;
+    .retreivr-badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
     }
 
-    .retreivr-search-results {
+    .retreivr-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--retreivr-text);
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .retreivr-panel {
+      padding: 24px;
+    }
+
+    .retreivr-panel-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .retreivr-panel-title h2,
+    .retreivr-panel-title h3 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
+    }
+
+    .retreivr-body {
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 6px 0 0;
+    }
+
+    .retreivr-metric {
+      background: var(--retreivr-panel);
+      border: 1px solid var(--retreivr-border);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .retreivr-metric-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--retreivr-text-muted);
+      margin-bottom: 10px;
+    }
+
+    .retreivr-metric-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--retreivr-text);
+      word-break: break-word;
+    }
+
+    .retreivr-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 13px;
+    }
+
+    .retreivr-status-pill::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--retreivr-text-muted);
+    }
+
+    .retreivr-status-pill.is-ok::before {
+      background: var(--retreivr-accent-strong);
+      box-shadow: 0 0 0 6px rgba(37, 211, 162, 0.14);
+    }
+
+    .retreivr-status-pill.is-error::before {
+      background: var(--retreivr-danger);
+      box-shadow: 0 0 0 6px rgba(255, 125, 125, 0.12);
+    }
+
+    .retreivr-form-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .retreivr-field {
       display: flex;
       flex-direction: column;
+      gap: 8px;
+    }
+
+    .retreivr-field label,
+    .retreivr-toggle-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--retreivr-text);
+      letter-spacing: 0.01em;
+    }
+
+    .retreivr-field input,
+    .retreivr-field select {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 48px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(7, 10, 16, 0.7);
+      color: var(--retreivr-text);
+      font-size: 14px;
+    }
+
+    .retreivr-field input:focus,
+    .retreivr-field select:focus {
+      outline: none;
+      border-color: rgba(79, 195, 161, 0.8);
+      box-shadow: 0 0 0 3px rgba(79, 195, 161, 0.18);
+    }
+
+    .retreivr-toggle-grid {
+      display: grid;
       gap: 12px;
+    }
+
+    .retreivr-toggle {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 16px;
+      border-radius: 16px;
+      background: var(--retreivr-panel);
+      border: 1px solid var(--retreivr-border);
+    }
+
+    .retreivr-toggle input {
+      margin-top: 2px;
+      transform: scale(1.15);
+    }
+
+    .retreivr-toggle-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .retreivr-toggle-copy span:last-child {
+      font-size: 13px;
+      color: var(--retreivr-text-soft);
+      line-height: 1.5;
+    }
+
+    .retreivr-message {
+      min-height: 20px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .retreivr-message.is-error {
+      color: var(--retreivr-danger);
+    }
+
+    .retreivr-results {
+      display: grid;
+      gap: 14px;
       margin-top: 14px;
     }
 
     .retreivr-card {
       display: flex;
-      gap: 14px;
+      gap: 16px;
       align-items: flex-start;
-      padding: 14px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.035);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--retreivr-panel);
+      border: 1px solid var(--retreivr-border);
     }
 
-    .retreivr-thumb {
-      width: 76px;
-      height: 76px;
-      object-fit: cover;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.06);
+    .retreivr-card-art,
+    .retreivr-card-art-empty {
+      width: 84px;
+      height: 84px;
+      border-radius: 16px;
       flex: 0 0 auto;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.05);
     }
 
-    .retreivr-thumb.placeholder {
+    .retreivr-card-art {
+      object-fit: cover;
+    }
+
+    .retreivr-card-art-empty {
       display: flex;
       align-items: center;
       justify-content: center;
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--retreivr-text-muted);
       font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
     }
 
     .retreivr-card-main {
@@ -77,142 +318,211 @@
 
     .retreivr-card-title {
       font-size: 18px;
+      line-height: 1.3;
       font-weight: 600;
-      margin-bottom: 6px;
+      color: var(--retreivr-text);
+      margin: 0 0 6px;
       cursor: pointer;
     }
 
-    .retreivr-card-meta {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.72);
-      margin-bottom: 6px;
+    .retreivr-card-meta,
+    .retreivr-card-ref {
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 8px;
+      word-break: break-word;
     }
 
     .retreivr-card-ref {
+      color: var(--retreivr-text-muted);
       font-family: monospace;
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.55);
-      margin-bottom: 10px;
-      word-break: break-all;
-    }
-
-    .retreivr-subtitle {
-      font-size: 18px;
-      font-weight: 600;
       margin-bottom: 12px;
     }
 
-    .retreivr-message {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.75);
-      min-height: 20px;
+    .retreivr-empty {
+      padding: 24px;
+      border-radius: 18px;
+      border: 1px dashed rgba(255, 255, 255, 0.16);
+      color: var(--retreivr-text-soft);
+      text-align: center;
+      background: rgba(255, 255, 255, 0.02);
     }
 
-    .retreivr-message.error {
-      color: #ff7f7f;
+    @media (max-width: 720px) {
+      .retreivr-hero,
+      .retreivr-panel {
+        padding: 18px;
+        border-radius: 18px;
+      }
+
+      .retreivr-headline {
+        font-size: 26px;
+      }
+
+      .retreivr-card {
+        flex-direction: column;
+      }
+
+      .retreivr-card-art,
+      .retreivr-card-art-empty {
+        width: 100%;
+        max-width: 120px;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="RetreivrConfigPage" data-role="page" class="page type-interior pluginConfigurationPage">
+  <div id="RetreivrConfigPage" data-role="page" class="page type-interior pluginConfigurationPage MainPluginConfigurationPage">
     <div data-role="content">
-      <div class="content-primary retreivr-page">
-        <div id="RetreivrConfigForm" class="retreivr-group">
-          <div class="sectionTitleContainer flex align-items-center">
-            <h2 class="sectionTitle">Retreivr</h2>
+      <div class="content-primary retreivr-shell">
+        <section class="retreivr-hero">
+          <div class="retreivr-hero-grid">
+            <div>
+              <h1 class="retreivr-headline">Retreivr for Jellyfin</h1>
+              <p class="retreivr-subhead">
+                Search, inspect availability, and send acquisition requests to Retreivr from inside Jellyfin.
+                This page is tuned for backend setup first, then fast music lookup and queueing.
+              </p>
+              <div class="retreivr-badge-row">
+                <div class="retreivr-badge">MusicBrainz-aware search</div>
+                <div class="retreivr-badge">Core + Resolution health</div>
+                <div class="retreivr-badge">Direct album and track queueing</div>
+              </div>
+            </div>
+            <div class="retreivr-metric">
+              <div class="retreivr-metric-label">Retreivr UI</div>
+              <div id="RetreivrUiMetric" class="retreivr-metric-value">Not configured</div>
+              <p class="retreivr-body">
+                Jellyfin server plugins can expose dashboard pages, but full user-facing sidebar injection is limited by the web client platform.
+              </p>
+              <div class="retreivr-hero-actions">
+                <button is="emby-button" id="RetreivrOpenUi" type="button" class="raised button-submit">
+                  <span>Open Retreivr UI</span>
+                </button>
+                <button is="emby-button" id="RetreivrRefreshStatus" type="button" class="button-submit">
+                  <span>Refresh Status</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="retreivr-panel">
+          <div class="retreivr-panel-title">
+            <div>
+              <h2>Connection and Behavior</h2>
+              <p class="retreivr-body">Persisted through Jellyfin’s native plugin configuration API so changes survive reloads and restarts.</p>
+            </div>
           </div>
 
-          <div class="retreivr-message">
-            Configure the Retreivr backend below, then use this page as the first in-Jellyfin search and acquisition surface.
-          </div>
+          <div id="RetreivrConfigForm" class="retreivr-form-grid">
+            <div class="retreivr-config-grid">
+              <div class="retreivr-field">
+                <label for="ResolutionApiBaseUrl">Resolution API base URL</label>
+                <input id="ResolutionApiBaseUrl" name="ResolutionApiBaseUrl" type="text" placeholder="http://retreivr.local:8000" />
+              </div>
 
-          <div class="retreivr-grid">
-            <div class="inputContainer">
-              <label class="inputLabel inputLabelUnfocused" for="ResolutionApiBaseUrl">Resolution API Base URL</label>
-              <input id="ResolutionApiBaseUrl" name="ResolutionApiBaseUrl" type="text" />
+              <div class="retreivr-field">
+                <label for="ResolutionApiKey">Resolution API key</label>
+                <input id="ResolutionApiKey" name="ResolutionApiKey" type="password" placeholder="Optional bearer token" />
+              </div>
+
+              <div class="retreivr-field">
+                <label for="RetreivrCoreBaseUrl">Retreivr Core base URL</label>
+                <input id="RetreivrCoreBaseUrl" name="RetreivrCoreBaseUrl" type="text" placeholder="http://retreivr.local:8000" />
+              </div>
+
+              <div class="retreivr-field">
+                <label for="RetreivrCoreApiKey">Retreivr Core API key</label>
+                <input id="RetreivrCoreApiKey" name="RetreivrCoreApiKey" type="password" placeholder="Optional bearer token" />
+              </div>
+
+              <div class="retreivr-field">
+                <label for="RequestTimeoutSeconds">Request timeout seconds</label>
+                <input id="RequestTimeoutSeconds" name="RequestTimeoutSeconds" type="number" min="1" step="1" />
+              </div>
             </div>
 
-            <div class="inputContainer">
-              <label class="inputLabel inputLabelUnfocused" for="ResolutionApiKey">Resolution API Key</label>
-              <input id="ResolutionApiKey" name="ResolutionApiKey" type="password" />
+            <div class="retreivr-toggle-grid">
+              <label class="retreivr-toggle">
+                <input id="EnableAvailabilityBadges" name="EnableAvailabilityBadges" type="checkbox" />
+                <span class="retreivr-toggle-copy">
+                  <span class="retreivr-toggle-label">Availability badges</span>
+                  <span>Keep resolution/availability signals enabled for future Jellyfin item integrations.</span>
+                </span>
+              </label>
+
+              <label class="retreivr-toggle">
+                <input id="EnableInstantResolvedPlayback" name="EnableInstantResolvedPlayback" type="checkbox" />
+                <span class="retreivr-toggle-copy">
+                  <span class="retreivr-toggle-label">Instant resolved playback</span>
+                  <span>Preserve the toggle now so playback interception can be wired without changing saved config later.</span>
+                </span>
+              </label>
+
+              <label class="retreivr-toggle">
+                <input id="EnableRetreivrDownloadActions" name="EnableRetreivrDownloadActions" type="checkbox" />
+                <span class="retreivr-toggle-copy">
+                  <span class="retreivr-toggle-label">Download actions</span>
+                  <span>Allow album and track queue buttons to dispatch acquisition work directly to Retreivr Core.</span>
+                </span>
+              </label>
             </div>
 
-            <div class="inputContainer">
-              <label class="inputLabel inputLabelUnfocused" for="RetreivrCoreBaseUrl">Retreivr Core Base URL</label>
-              <input id="RetreivrCoreBaseUrl" name="RetreivrCoreBaseUrl" type="text" />
+            <div class="retreivr-actions">
+              <button is="emby-button" id="RetreivrSaveConfig" type="button" class="raised button-submit">
+                <span>Save Settings</span>
+              </button>
             </div>
+            <div id="RetreivrConfigMessage" class="retreivr-message"></div>
+          </div>
+        </section>
 
-            <div class="inputContainer">
-              <label class="inputLabel inputLabelUnfocused" for="RetreivrCoreApiKey">Retreivr Core API Key</label>
-              <input id="RetreivrCoreApiKey" name="RetreivrCoreApiKey" type="password" />
+        <section class="retreivr-panel">
+          <div class="retreivr-panel-title">
+            <div>
+              <h2>Backend Status</h2>
+              <p class="retreivr-body">Runtime connectivity is checked through the plugin API against the currently saved configuration.</p>
             </div>
           </div>
 
-          <div class="checkboxContainer checkboxContainer-withDescription">
-            <label>
-              <input id="EnableAvailabilityBadges" name="EnableAvailabilityBadges" type="checkbox" />
-              <span>Enable availability badges</span>
-            </label>
-          </div>
-
-          <div class="checkboxContainer checkboxContainer-withDescription">
-            <label>
-              <input id="EnableInstantResolvedPlayback" name="EnableInstantResolvedPlayback" type="checkbox" />
-              <span>Enable instant resolved playback</span>
-            </label>
-          </div>
-
-          <div class="checkboxContainer checkboxContainer-withDescription">
-            <label>
-              <input id="EnableRetreivrDownloadActions" name="EnableRetreivrDownloadActions" type="checkbox" />
-              <span>Enable Retreivr download actions</span>
-            </label>
-          </div>
-
-          <div class="inputContainer">
-            <label class="inputLabel inputLabelUnfocused" for="RequestTimeoutSeconds">Request timeout seconds</label>
-            <input id="RequestTimeoutSeconds" name="RequestTimeoutSeconds" type="number" min="1" step="1" />
-          </div>
-
-          <div class="retreivr-row">
-            <button is="emby-button" id="RetreivrSaveConfig" type="button" class="raised button-submit">
-              <span>Save</span>
-            </button>
-            <button is="emby-button" id="RetreivrRefreshStatus" type="button" class="button-submit">
-              <span>Refresh Status</span>
-            </button>
-            <button is="emby-button" id="RetreivrOpenUi" type="button" class="button-submit">
-              <span>Open Retreivr UI</span>
-            </button>
-          </div>
-          <div id="RetreivrConfigMessage" class="retreivr-message"></div>
-        </div>
-
-        <div class="retreivr-group">
-          <div class="retreivr-subtitle">Backend Status</div>
-          <div class="retreivr-message">
-            This checks the configured Resolution API and Retreivr Core base URLs using their health endpoints.
-          </div>
-          <div id="RetreivrStatus" class="retreivr-status">Loading...</div>
-        </div>
-
-        <div class="retreivr-group">
-          <div class="retreivr-subtitle">Music Search</div>
-          <div class="retreivr-grid">
-            <div class="inputContainer">
-              <label class="inputLabel inputLabelUnfocused" for="MusicSearchArtist">Artist</label>
-              <input id="MusicSearchArtist" type="text" />
+          <div class="retreivr-status-grid">
+            <div class="retreivr-metric">
+              <div class="retreivr-metric-label">Resolution API</div>
+              <div id="ResolutionStatusPill" class="retreivr-status-pill">Checking...</div>
+              <div id="ResolutionStatusText" class="retreivr-status-text retreivr-body"></div>
             </div>
-            <div class="inputContainer">
-              <label class="inputLabel inputLabelUnfocused" for="MusicSearchAlbum">Album</label>
-              <input id="MusicSearchAlbum" type="text" />
+            <div class="retreivr-metric">
+              <div class="retreivr-metric-label">Retreivr Core</div>
+              <div id="CoreStatusPill" class="retreivr-status-pill">Checking...</div>
+              <div id="CoreStatusText" class="retreivr-status-text retreivr-body"></div>
             </div>
-            <div class="inputContainer">
-              <label class="inputLabel inputLabelUnfocused" for="MusicSearchTrack">Track</label>
-              <input id="MusicSearchTrack" type="text" />
+          </div>
+        </section>
+
+        <section class="retreivr-panel">
+          <div class="retreivr-panel-title">
+            <div>
+              <h2>Music Search</h2>
+              <p class="retreivr-body">Search artists, albums, or tracks through Retreivr Core and queue downloads without leaving Jellyfin.</p>
             </div>
-            <div class="inputContainer">
-              <label class="inputLabel inputLabelUnfocused" for="MusicSearchMode">Mode</label>
+          </div>
+
+          <div class="retreivr-search-grid">
+            <div class="retreivr-field">
+              <label for="MusicSearchArtist">Artist</label>
+              <input id="MusicSearchArtist" type="text" placeholder="Artist name" />
+            </div>
+            <div class="retreivr-field">
+              <label for="MusicSearchAlbum">Album</label>
+              <input id="MusicSearchAlbum" type="text" placeholder="Album title" />
+            </div>
+            <div class="retreivr-field">
+              <label for="MusicSearchTrack">Track</label>
+              <input id="MusicSearchTrack" type="text" placeholder="Track title" />
+            </div>
+            <div class="retreivr-field">
+              <label for="MusicSearchMode">Search mode</label>
               <select id="MusicSearchMode">
                 <option value="auto">Auto</option>
                 <option value="artist">Artist</option>
@@ -221,7 +531,8 @@
               </select>
             </div>
           </div>
-          <div class="retreivr-row">
+
+          <div class="retreivr-actions">
             <button is="emby-button" id="MusicSearchSubmit" type="button" class="raised button-submit">
               <span>Search</span>
             </button>
@@ -230,40 +541,96 @@
             </button>
           </div>
           <div id="MusicSearchMessage" class="retreivr-message"></div>
-          <div id="MusicSearchResults" class="retreivr-search-results"></div>
-        </div>
+          <div id="MusicSearchResults" class="retreivr-results">
+            <div class="retreivr-empty">Search results will appear here.</div>
+          </div>
+        </section>
       </div>
     </div>
   </div>
 
   <script type="text/javascript">
     const pluginId = "5fe1b9d8-2f4d-48d9-8fc3-f37b4760a96f";
+    const defaults = {
+      ResolutionApiBaseUrl: "http://localhost:8000",
+      ResolutionApiKey: "",
+      RetreivrCoreBaseUrl: "http://localhost:8000",
+      RetreivrCoreApiKey: "",
+      EnableAvailabilityBadges: true,
+      EnableInstantResolvedPlayback: false,
+      EnableRetreivrDownloadActions: true,
+      RequestTimeoutSeconds: 5
+    };
+
     const state = {
-      config: null,
-      viewStack: [],
-      currentView: null
+      config: { ...defaults },
+      currentView: null,
+      viewStack: []
     };
 
     const byId = (id) => document.getElementById(id);
+
     const setMessage = (id, text, isError = false) => {
       const el = byId(id);
-      if (!el) return;
+      if (!el) {
+        return;
+      }
+
       el.textContent = text || "";
-      el.classList.toggle("error", !!isError);
+      el.classList.toggle("is-error", !!isError);
     };
 
     const readConfigValue = (config, pascalName, fallback) => {
       if (!config || typeof config !== "object") {
         return fallback;
       }
+
       if (config[pascalName] !== undefined) {
         return config[pascalName];
       }
+
       const camelName = pascalName.charAt(0).toLowerCase() + pascalName.slice(1);
       if (config[camelName] !== undefined) {
         return config[camelName];
       }
+
       return fallback;
+    };
+
+    const mergeConfig = (config) => ({
+      ...defaults,
+      ResolutionApiBaseUrl: String(readConfigValue(config, "ResolutionApiBaseUrl", defaults.ResolutionApiBaseUrl) || ""),
+      ResolutionApiKey: String(readConfigValue(config, "ResolutionApiKey", defaults.ResolutionApiKey) || ""),
+      RetreivrCoreBaseUrl: String(readConfigValue(config, "RetreivrCoreBaseUrl", defaults.RetreivrCoreBaseUrl) || ""),
+      RetreivrCoreApiKey: String(readConfigValue(config, "RetreivrCoreApiKey", defaults.RetreivrCoreApiKey) || ""),
+      EnableAvailabilityBadges: !!readConfigValue(config, "EnableAvailabilityBadges", defaults.EnableAvailabilityBadges),
+      EnableInstantResolvedPlayback: !!readConfigValue(config, "EnableInstantResolvedPlayback", defaults.EnableInstantResolvedPlayback),
+      EnableRetreivrDownloadActions: !!readConfigValue(config, "EnableRetreivrDownloadActions", defaults.EnableRetreivrDownloadActions),
+      RequestTimeoutSeconds: Number(readConfigValue(config, "RequestTimeoutSeconds", defaults.RequestTimeoutSeconds) || defaults.RequestTimeoutSeconds)
+    });
+
+    const collectConfig = () => ({
+      ResolutionApiBaseUrl: byId("ResolutionApiBaseUrl").value.trim(),
+      ResolutionApiKey: byId("ResolutionApiKey").value,
+      RetreivrCoreBaseUrl: byId("RetreivrCoreBaseUrl").value.trim(),
+      RetreivrCoreApiKey: byId("RetreivrCoreApiKey").value,
+      EnableAvailabilityBadges: byId("EnableAvailabilityBadges").checked,
+      EnableInstantResolvedPlayback: byId("EnableInstantResolvedPlayback").checked,
+      EnableRetreivrDownloadActions: byId("EnableRetreivrDownloadActions").checked,
+      RequestTimeoutSeconds: Math.max(1, parseInt(byId("RequestTimeoutSeconds").value || String(defaults.RequestTimeoutSeconds), 10) || defaults.RequestTimeoutSeconds)
+    });
+
+    const applyConfig = (config) => {
+      state.config = mergeConfig(config);
+      byId("ResolutionApiBaseUrl").value = state.config.ResolutionApiBaseUrl;
+      byId("ResolutionApiKey").value = state.config.ResolutionApiKey;
+      byId("RetreivrCoreBaseUrl").value = state.config.RetreivrCoreBaseUrl;
+      byId("RetreivrCoreApiKey").value = state.config.RetreivrCoreApiKey;
+      byId("EnableAvailabilityBadges").checked = state.config.EnableAvailabilityBadges;
+      byId("EnableInstantResolvedPlayback").checked = state.config.EnableInstantResolvedPlayback;
+      byId("EnableRetreivrDownloadActions").checked = state.config.EnableRetreivrDownloadActions;
+      byId("RequestTimeoutSeconds").value = state.config.RequestTimeoutSeconds;
+      updateUiMetric();
     };
 
     const apiFetch = async (path, options = {}) => {
@@ -274,16 +641,19 @@
       } catch (_err) {
         payload = null;
       }
+
       if (!response.ok) {
         const message = payload && payload.detail ? payload.detail : `HTTP ${response.status}`;
         throw new Error(message);
       }
+
       return payload;
     };
 
-    const coreBaseUrl = () => {
-      const config = state.config || {};
-      return String(readConfigValue(config, "RetreivrCoreBaseUrl", "") || "").trim().replace(/\/+$/, "");
+    const coreBaseUrl = () => String(state.config.RetreivrCoreBaseUrl || "").trim().replace(/\/+$/, "");
+
+    const updateUiMetric = () => {
+      byId("RetreivrUiMetric").textContent = coreBaseUrl() || "Not configured";
     };
 
     const albumArtUrl = (releaseGroupMbid) => {
@@ -291,7 +661,61 @@
       if (!base || !releaseGroupMbid) {
         return null;
       }
+
       return `${base}/api/music/album/art/${encodeURIComponent(releaseGroupMbid)}`;
+    };
+
+    const setStatusCard = (pillId, textId, ok, lines) => {
+      const pill = byId(pillId);
+      const text = byId(textId);
+      pill.textContent = ok ? "Reachable" : "Unavailable";
+      pill.classList.remove("is-ok", "is-error");
+      pill.classList.add(ok ? "is-ok" : "is-error");
+      text.textContent = (lines || []).filter(Boolean).join("\n");
+      text.style.whiteSpace = "pre-line";
+    };
+
+    const loadStatus = async () => {
+      try {
+        const payload = await apiFetch("/Plugins/Retreivr/status");
+        setStatusCard("ResolutionStatusPill", "ResolutionStatusText", !!payload.resolutionApiHealthy, [
+          payload.resolutionApiBaseUrl ? `URL: ${payload.resolutionApiBaseUrl}` : "URL: not configured",
+          payload.resolutionApiError ? `Error: ${payload.resolutionApiError}` : "Health endpoint responded."
+        ]);
+        setStatusCard("CoreStatusPill", "CoreStatusText", !!payload.retreivrCoreHealthy, [
+          payload.retreivrCoreBaseUrl ? `URL: ${payload.retreivrCoreBaseUrl}` : "URL: not configured",
+          payload.retreivrCoreError ? `Error: ${payload.retreivrCoreError}` : "Health endpoint responded."
+        ]);
+
+        if (payload.retreivrUiUrl) {
+          state.config.RetreivrCoreBaseUrl = String(payload.retreivrUiUrl);
+          updateUiMetric();
+        }
+      } catch (err) {
+        setStatusCard("ResolutionStatusPill", "ResolutionStatusText", false, [`Status check failed: ${err.message}`]);
+        setStatusCard("CoreStatusPill", "CoreStatusText", false, ["Status check failed."]);
+      }
+    };
+
+    const loadConfig = async () => {
+      const config = await apiFetch("/Plugins/Retreivr/config", { cache: "no-store" });
+      applyConfig(config || defaults);
+      return state.config;
+    };
+
+    const saveConfig = async () => {
+      const config = collectConfig();
+      const result = await apiFetch("/Plugins/Retreivr/config", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(config)
+      });
+
+      applyConfig(result || config);
+      setMessage("RetreivrConfigMessage", "Settings saved.");
+      await loadStatus();
     };
 
     const formatDuration = (seconds) => {
@@ -299,6 +723,7 @@
       if (!Number.isFinite(total) || total <= 0) {
         return "-";
       }
+
       const rounded = Math.round(total);
       const minutes = Math.floor(rounded / 60);
       const secs = rounded % 60;
@@ -306,54 +731,64 @@
     };
 
     const normalizeTracks = (raw) => {
-      if (!Array.isArray(raw)) return [];
-      return raw.filter((item) => item && item.recording_mbid).map((item) => ({
-        recording_mbid: String(item.recording_mbid || "").trim(),
-        mb_release_id: String(item.release_mbid || item.mb_release_id || "").trim(),
-        mb_release_group_id: String(item.release_group_mbid || item.mb_release_group_id || "").trim(),
-        artist: String(item.artist || "").trim(),
-        track: String(item.track || "").trim(),
-        album: String(item.album || "").trim(),
-        release_year: String(item.release_year || "").trim(),
-        track_number: Number(item.track_number || 0) || null,
-        disc_number: Number(item.disc_number || 0) || null,
-        duration_ms: Number(item.duration_ms || 0) || null
-      }));
-    };
-
-    const pushView = () => {
-      if (state.currentView) {
-        state.viewStack.push(state.currentView);
-        byId("MusicSearchBack").style.display = "";
+      if (!Array.isArray(raw)) {
+        return [];
       }
+
+      return raw
+        .filter((item) => item && item.recording_mbid)
+        .map((item) => ({
+          recording_mbid: String(item.recording_mbid || "").trim(),
+          mb_release_id: String(item.release_mbid || item.mb_release_id || "").trim(),
+          mb_release_group_id: String(item.release_group_mbid || item.mb_release_group_id || "").trim(),
+          artist: String(item.artist || "").trim(),
+          track: String(item.track || "").trim(),
+          album: String(item.album || "").trim(),
+          release_year: String(item.release_year || "").trim(),
+          track_number: Number(item.track_number || 0) || null,
+          disc_number: Number(item.disc_number || 0) || null,
+          duration_ms: Number(item.duration_ms || 0) || null
+        }));
     };
 
-    const popView = () => {
-      const previous = state.viewStack.pop() || null;
-      state.currentView = previous;
-      byId("MusicSearchBack").style.display = state.viewStack.length ? "" : "none";
-      if (previous) {
-        renderResults(previous);
-      }
+    const setEmptyResults = (text) => {
+      byId("MusicSearchResults").innerHTML = `<div class="retreivr-empty">${text}</div>`;
     };
 
-    const createThumb = (releaseGroupMbid) => {
-      const img = document.createElement("img");
-      img.className = "retreivr-thumb";
+    const createButton = (label, handler, isPrimary = false) => {
+      const button = document.createElement("button");
+      button.setAttribute("is", "emby-button");
+      button.type = "button";
+      button.className = isPrimary ? "raised button-submit" : "button-submit";
+      button.innerHTML = `<span>${label}</span>`;
+      button.addEventListener("click", handler);
+      return button;
+    };
+
+    const createArtwork = (releaseGroupMbid) => {
       const url = albumArtUrl(releaseGroupMbid);
-      if (url) {
-        img.src = url;
-        img.alt = "Artwork";
-      } else {
-        img.classList.add("placeholder");
+      if (!url) {
+        const placeholder = document.createElement("div");
+        placeholder.className = "retreivr-card-art-empty";
+        placeholder.textContent = "No Art";
+        return placeholder;
       }
-      return img;
+
+      const image = document.createElement("img");
+      image.className = "retreivr-card-art";
+      image.src = url;
+      image.alt = "Artwork";
+      image.loading = "lazy";
+      image.addEventListener("error", () => {
+        image.replaceWith(createArtwork(""));
+      }, { once: true });
+      return image;
     };
 
     const createCard = ({ title, meta, ref, actions = [], releaseGroupMbid = "" }) => {
-      const card = document.createElement("div");
+      const card = document.createElement("article");
       card.className = "retreivr-card";
-      card.appendChild(createThumb(releaseGroupMbid));
+      card.appendChild(createArtwork(releaseGroupMbid));
 
       const main = document.createElement("div");
       main.className = "retreivr-card-main";
@@ -374,7 +809,7 @@
       main.appendChild(refEl);
 
       const actionRow = document.createElement("div");
-      actionRow.className = "retreivr-row";
+      actionRow.className = "retreivr-card-actions";
       actions.forEach((button) => actionRow.appendChild(button));
       main.appendChild(actionRow);
 
@@ -382,22 +817,36 @@
       return { card, titleEl };
     };
 
-    const createButton = (label, handler, isPrimary = false) => {
-      const button = document.createElement("button");
-      button.setAttribute("is", "emby-button");
-      button.type = "button";
-      button.className = isPrimary ? "raised button-submit" : "button-submit";
-      button.innerHTML = `<span>${label}</span>`;
-      button.addEventListener("click", handler);
-      return button;
+    const pushView = () => {
+      if (state.currentView) {
+        state.viewStack.push(state.currentView);
+        byId("MusicSearchBack").style.display = "";
+      }
+    };
+
+    const popView = () => {
+      const previous = state.viewStack.pop() || null;
+      state.currentView = previous;
+      byId("MusicSearchBack").style.display = state.viewStack.length ? "" : "none";
+      if (previous) {
+        renderResults(previous);
+      } else {
+        setEmptyResults("Search results will appear here.");
+      }
     };
 
     const renderArtists = (artists) => {
       const results = byId("MusicSearchResults");
       results.innerHTML = "";
+
+      if (!artists.length) {
+        setEmptyResults("No artists matched the current search.");
+        return;
+      }
+
       artists.forEach((artistItem) => {
-        const artistName = String(artistItem?.name || "").trim();
-        const artistMbid = String(artistItem?.artist_mbid || artistItem?.id || "").trim();
+        const artistName = String(artistItem && artistItem.name || "").trim();
+        const artistMbid = String(artistItem && (artistItem.artist_mbid || artistItem.id) || "").trim();
         const button = createButton("View Albums", async () => {
           pushView();
           setMessage("MusicSearchMessage", `Loading albums for ${artistName}...`);
@@ -410,10 +859,12 @@
             setMessage("MusicSearchMessage", `Album lookup failed: ${err.message}`, true);
           }
         }, true);
+
+        const details = [artistItem && artistItem.country, artistItem && artistItem.disambiguation].filter(Boolean).join(" • ");
         const { card, titleEl } = createCard({
-          title: artistName,
-          meta: [artistItem?.country, artistItem?.disambiguation].filter(Boolean).join(" • "),
-          ref: artistMbid ? `MB: artist ${artistMbid}` : "MB: artist (unknown)",
+          title: artistName || "Unknown artist",
+          meta: details || "Artist result",
+          ref: artistMbid ? `MB artist ${artistMbid}` : "MusicBrainz id unavailable",
           actions: [button]
         });
         titleEl.addEventListener("click", () => button.click());
@@ -424,12 +875,19 @@
     const renderAlbums = (albums) => {
       const results = byId("MusicSearchResults");
       results.innerHTML = "";
-      const entries = Array.isArray(albums) ? albums : (Array.isArray(albums?.album_candidates) ? albums.album_candidates : []);
+      const entries = Array.isArray(albums) ? albums : (Array.isArray(albums && albums.album_candidates) ? albums.album_candidates : []);
+
+      if (!entries.length) {
+        setEmptyResults("No albums were returned for that artist or search.");
+        return;
+      }
+
       entries.forEach((albumItem) => {
-        const releaseGroupMbid = String(albumItem?.release_group_mbid || albumItem?.release_group_id || albumItem?.album_id || "").trim();
-        const title = String(albumItem?.title || "").trim();
-        const artist = String(albumItem?.artist || albumItem?.artist_credit || "").trim();
-        const year = String(albumItem?.first_release_date || "").trim().slice(0, 4);
+        const releaseGroupMbid = String(albumItem && (albumItem.release_group_mbid || albumItem.release_group_id || albumItem.album_id) || "").trim();
+        const title = String(albumItem && albumItem.title || "").trim();
+        const artist = String(albumItem && (albumItem.artist || albumItem.artist_credit) || "").trim();
+        const year = String(albumItem && albumItem.first_release_date || "").trim().slice(0, 4);
+
         const viewTracks = createButton("View Tracks", async () => {
           pushView();
           setMessage("MusicSearchMessage", `Loading tracks for ${title || "album"}...`);
@@ -442,20 +900,22 @@
             setMessage("MusicSearchMessage", `Track lookup failed: ${err.message}`, true);
           }
         });
-        const download = createButton("Download Album", async () => {
+
+        const download = createButton("Queue Album", async () => {
           setMessage("MusicSearchMessage", `Queueing ${title || "album"}...`);
           try {
             const payload = await apiFetch(`/Plugins/Retreivr/music/albums/${encodeURIComponent(releaseGroupMbid)}/download`, { method: "POST" });
-            const queued = Number(payload?.tracks_enqueued || 0);
+            const queued = Number(payload && payload.tracks_enqueued || 0);
             setMessage("MusicSearchMessage", queued > 0 ? `Album queued: ${queued} tracks.` : "Album request completed with 0 queued tracks.");
           } catch (err) {
             setMessage("MusicSearchMessage", `Album queue failed: ${err.message}`, true);
           }
         }, true);
+
         const { card, titleEl } = createCard({
-          title,
+          title: title || "Unknown album",
           meta: [artist, year ? `(${year})` : ""].filter(Boolean).join(" "),
-          ref: releaseGroupMbid ? `MB: release-group ${releaseGroupMbid}` : "MB: release-group (unknown)",
+          ref: releaseGroupMbid ? `MB release-group ${releaseGroupMbid}` : "MusicBrainz release-group unavailable",
           actions: [viewTracks, download],
           releaseGroupMbid
         });
@@ -467,10 +927,16 @@
     const renderTracks = (tracksPayload) => {
       const results = byId("MusicSearchResults");
       results.innerHTML = "";
-      const tracks = normalizeTracks(tracksPayload?.tracks || tracksPayload);
+      const tracks = normalizeTracks(tracksPayload && (tracksPayload.tracks || tracksPayload));
       tracks.sort((a, b) => (a.disc_number || 0) - (b.disc_number || 0) || (a.track_number || 0) - (b.track_number || 0));
+
+      if (!tracks.length) {
+        setEmptyResults("No tracks were returned for that album.");
+        return;
+      }
+
       tracks.forEach((trackItem) => {
-        const download = createButton("Download", async () => {
+        const download = createButton("Queue Track", async () => {
           setMessage("MusicSearchMessage", `Queueing ${trackItem.track || "track"}...`);
           try {
             const payload = await apiFetch("/Plugins/Retreivr/music/enqueue", {
@@ -490,16 +956,17 @@
                 media_mode: "music"
               })
             });
-            setMessage("MusicSearchMessage", payload?.created ? "Track queued." : `Track not queued${payload?.dedupe_reason ? ` (${payload.dedupe_reason})` : ""}.`);
+            setMessage("MusicSearchMessage", payload && payload.created ? "Track queued." : `Track not queued${payload && payload.dedupe_reason ? ` (${payload.dedupe_reason})` : ""}.`);
           } catch (err) {
             setMessage("MusicSearchMessage", `Track queue failed: ${err.message}`, true);
           }
         }, true);
+
         const trackLabel = trackItem.track_number ? `${String(trackItem.track_number).padStart(2, "0")}. ${trackItem.track}` : trackItem.track;
         const { card } = createCard({
-          title: trackLabel,
-          meta: `${trackItem.artist || ""} • ${formatDuration((trackItem.duration_ms || 0) / 1000)}`,
-          ref: trackItem.recording_mbid ? `MB: rec ${trackItem.recording_mbid}` : "MB: rec (unknown)",
+          title: trackLabel || "Unknown track",
+          meta: `${trackItem.artist || "Unknown artist"} • ${formatDuration((trackItem.duration_ms || 0) / 1000)}`,
+          ref: trackItem.recording_mbid ? `MB recording ${trackItem.recording_mbid}` : "MusicBrainz recording unavailable",
           actions: [download],
           releaseGroupMbid: trackItem.mb_release_group_id
         });
@@ -508,119 +975,93 @@
     };
 
     const renderResults = (view) => {
-      if (!view) return;
-      if (view.type === "artists") {
-        renderArtists(Array.isArray(view.payload?.artists) ? view.payload.artists : []);
+      if (!view) {
+        setEmptyResults("Search results will appear here.");
         return;
       }
+
+      if (view.type === "artists") {
+        renderArtists(Array.isArray(view.payload && view.payload.artists) ? view.payload.artists : []);
+        return;
+      }
+
       if (view.type === "albums") {
         renderAlbums(view.payload);
         return;
       }
+
       if (view.type === "tracks") {
         renderTracks(view.payload);
       }
     };
-
-    const loadStatus = async () => {
-      const statusEl = byId("RetreivrStatus");
-      statusEl.textContent = "Loading...";
-      try {
-        const payload = await apiFetch("/Plugins/Retreivr/status");
-        const lines = [
-          `Resolution API: ${payload.resolutionApiHealthy ? "reachable" : "unreachable"}`,
-          payload.resolutionApiBaseUrl ? `Resolution URL: ${payload.resolutionApiBaseUrl}` : "Resolution URL: not configured",
-          payload.resolutionApiError ? `Resolution Error: ${payload.resolutionApiError}` : "",
-          `Retreivr Core: ${payload.retreivrCoreHealthy ? "reachable" : "unreachable"}`,
-          payload.retreivrCoreBaseUrl ? `Core URL: ${payload.retreivrCoreBaseUrl}` : "Core URL: not configured",
-          payload.retreivrCoreError ? `Core Error: ${payload.retreivrCoreError}` : "",
-        ].filter(Boolean);
-        statusEl.textContent = lines.join("\n");
-      } catch (err) {
-        statusEl.textContent = `Status check failed: ${err.message}`;
-      }
-    };
-
-    const loadConfig = () => apiFetch("/Plugins/Retreivr/config").then((config) => {
-      state.config = config;
-      byId("ResolutionApiBaseUrl").value = readConfigValue(config, "ResolutionApiBaseUrl", "http://localhost:8000") || "";
-      byId("ResolutionApiKey").value = readConfigValue(config, "ResolutionApiKey", "") || "";
-      byId("RetreivrCoreBaseUrl").value = readConfigValue(config, "RetreivrCoreBaseUrl", "http://localhost:8000") || "";
-      byId("RetreivrCoreApiKey").value = readConfigValue(config, "RetreivrCoreApiKey", "") || "";
-      byId("EnableAvailabilityBadges").checked = !!readConfigValue(config, "EnableAvailabilityBadges", true);
-      byId("EnableInstantResolvedPlayback").checked = !!readConfigValue(config, "EnableInstantResolvedPlayback", false);
-      byId("EnableRetreivrDownloadActions").checked = !!readConfigValue(config, "EnableRetreivrDownloadActions", true);
-      byId("RequestTimeoutSeconds").value = Number(readConfigValue(config, "RequestTimeoutSeconds", 5) || 5);
-      return config;
-    });
 
     const performSearch = async () => {
       const artist = byId("MusicSearchArtist").value.trim();
       const album = byId("MusicSearchAlbum").value.trim();
       const track = byId("MusicSearchTrack").value.trim();
       const mode = byId("MusicSearchMode").value || "auto";
-      setMessage("MusicSearchMessage", "Searching MusicBrainz metadata via Retreivr...");
+
+      if (!artist && !album && !track) {
+        setMessage("MusicSearchMessage", "Enter at least one artist, album, or track term.", true);
+        setEmptyResults("Search results will appear here.");
+        return;
+      }
+
+      setMessage("MusicSearchMessage", "Searching Retreivr...");
       try {
         const payload = await apiFetch(`/Plugins/Retreivr/music/search?artist=${encodeURIComponent(artist)}&album=${encodeURIComponent(album)}&track=${encodeURIComponent(track)}&mode=${encodeURIComponent(mode)}`);
         state.viewStack = [];
         byId("MusicSearchBack").style.display = "none";
         state.currentView = {
-          type: Array.isArray(payload?.artists) && payload.artists.length ? "artists" : Array.isArray(payload?.albums) && payload.albums.length ? "albums" : "tracks",
+          type: Array.isArray(payload && payload.artists) && payload.artists.length
+            ? "artists"
+            : Array.isArray(payload && payload.albums) && payload.albums.length
+              ? "albums"
+              : "tracks",
           payload
         };
         renderResults(state.currentView);
         setMessage("MusicSearchMessage", "Search complete.");
       } catch (err) {
         setMessage("MusicSearchMessage", `Search failed: ${err.message}`, true);
+        setEmptyResults("Search failed.");
       }
     };
 
-    byId("RetreivrConfigPage").addEventListener("pageshow", function () {
+    byId("RetreivrConfigPage").addEventListener("pageshow", () => {
       Dashboard.showLoadingMsg();
-      loadConfig().then(loadStatus).finally(() => Dashboard.hideLoadingMsg());
+      Promise.resolve()
+        .then(loadConfig)
+        .then(loadStatus)
+        .finally(() => Dashboard.hideLoadingMsg());
     });
 
-    const saveConfig = function () {
+    byId("RetreivrSaveConfig").addEventListener("click", () => {
       Dashboard.showLoadingMsg();
-      Promise.resolve().then(function () {
-        const config = {
-          ResolutionApiBaseUrl: byId("ResolutionApiBaseUrl").value,
-          ResolutionApiKey: byId("ResolutionApiKey").value,
-          RetreivrCoreBaseUrl: byId("RetreivrCoreBaseUrl").value,
-          RetreivrCoreApiKey: byId("RetreivrCoreApiKey").value,
-          EnableAvailabilityBadges: byId("EnableAvailabilityBadges").checked,
-          EnableInstantResolvedPlayback: byId("EnableInstantResolvedPlayback").checked,
-          EnableRetreivrDownloadActions: byId("EnableRetreivrDownloadActions").checked,
-          RequestTimeoutSeconds: parseInt(byId("RequestTimeoutSeconds").value || "5", 10)
-        };
-
-        return apiFetch("/Plugins/Retreivr/config", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(config)
-        });
-      }).then(function () {
-        setMessage("RetreivrConfigMessage", "Settings saved.");
-        return loadConfig().then(loadStatus);
-      }).then(function () {
-        Dashboard.hideLoadingMsg();
-      })
-        .catch(function (err) {
+      setMessage("RetreivrConfigMessage", "");
+      Promise.resolve()
+        .then(saveConfig)
+        .finally(() => Dashboard.hideLoadingMsg())
+        .catch((err) => {
           setMessage("RetreivrConfigMessage", `Save failed: ${err.message}`, true);
-          Dashboard.hideLoadingMsg();
         });
-    };
+    });
 
-    byId("RetreivrRefreshStatus").addEventListener("click", () => loadStatus());
-    byId("RetreivrSaveConfig").addEventListener("click", () => saveConfig());
+    byId("RetreivrRefreshStatus").addEventListener("click", () => {
+      setMessage("RetreivrConfigMessage", "");
+      loadStatus();
+    });
+
     byId("RetreivrOpenUi").addEventListener("click", () => {
       const url = coreBaseUrl();
       if (!url) {
-        setMessage("RetreivrConfigMessage", "Retreivr Core Base URL is not configured.", true);
+        setMessage("RetreivrConfigMessage", "Retreivr Core base URL is not configured.", true);
         return;
       }
+
       window.open(url, "_blank", "noopener");
     });
+
     byId("MusicSearchSubmit").addEventListener("click", () => performSearch());
     byId("MusicSearchBack").addEventListener("click", () => popView());
   </script>

@@ -44,6 +44,11 @@ public sealed class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             new PluginPageInfo
             {
                 Name = Name,
+                DisplayName = "Retreivr",
+                EnableInMainMenu = true,
+                EnableInUserMenu = true,
+                MenuSection = "server",
+                MenuIcon = "library_music",
                 EmbeddedResourcePath = string.Format(
                     CultureInfo.InvariantCulture,
                     "{0}.Configuration.configPage.html",

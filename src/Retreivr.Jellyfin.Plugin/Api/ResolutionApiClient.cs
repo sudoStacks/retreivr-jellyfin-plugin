@@ -21,17 +21,17 @@ public sealed class ResolutionApiClient
     };
 
     private readonly HttpClient _httpClient;
-    private readonly PluginConfiguration _configuration;
+    private readonly PluginConfigurationProvider _configurationProvider;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResolutionApiClient"/> class.
     /// </summary>
     /// <param name="httpClient">Shared HTTP client.</param>
     /// <param name="configuration">Plugin configuration.</param>
-    public ResolutionApiClient(HttpClient httpClient, PluginConfiguration configuration)
+    public ResolutionApiClient(HttpClient httpClient, PluginConfigurationProvider configurationProvider)
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _configurationProvider = configurationProvider ?? throw new ArgumentNullException(nameof(configurationProvider));
     }
 
     /// <summary>
@@ -74,16 +74,17 @@ public sealed class ResolutionApiClient
 
     private async Task<T?> SendAsync<T>(string relativePath, HttpContent? content, CancellationToken cancellationToken)
     {
-        var baseUrl = (_configuration.ResolutionApiBaseUrl ?? string.Empty).Trim().TrimEnd('/');
+        var configuration = _configurationProvider.GetCurrent();
+        var baseUrl = (configuration.ResolutionApiBaseUrl ?? string.Empty).Trim().TrimEnd('/');
         if (string.IsNullOrWhiteSpace(baseUrl))
         {
             return default;
         }
 
         using var request = new HttpRequestMessage(content is null ? HttpMethod.Get : HttpMethod.Post, $"{baseUrl}/{relativePath}");
-        if (!string.IsNullOrWhiteSpace(_configuration.ResolutionApiKey))
+        if (!string.IsNullOrWhiteSpace(configuration.ResolutionApiKey))
         {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _configuration.ResolutionApiKey);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", configuration.ResolutionApiKey);
         }
 
         if (content is not null)
@@ -92,7 +93,7 @@ public sealed class ResolutionApiClient
         }
 
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeoutCts.CancelAfter(TimeSpan.FromSeconds(Math.Max(1, _configuration.RequestTimeoutSeconds)));
+        timeoutCts.CancelAfter(TimeSpan.FromSeconds(Math.Max(1, configuration.RequestTimeoutSeconds)));
 
         using var response = await _httpClient.SendAsync(request, timeoutCts.Token).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
