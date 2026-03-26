@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented here.
 
+## v0.1.9 — Direct Config Action Fallbacks
+
+### High-Level
+This release removes the last dependency on native form submission and fragile page-bound event hooks for the Jellyfin dashboard page. Core actions now have direct callable fallbacks so save, refresh, open-UI, and search actions can still execute even when Jellyfin’s SPA lifecycle interferes with normal event binding.
+
+### Changed
+- Plugin release metadata and packaging are now aligned to `v0.1.9`.
+
+### Fixed
+- `Save Settings` no longer depends on HTML form submission behavior.
+- `Open Retreivr UI`, `Refresh Status`, `Search`, and `Back` now have direct page-action fallbacks exposed on `window`.
+- The config page is more resilient when Jellyfin loads the page HTML but skips or delays normal script-bound event attachment.
+
 ## v0.1.8 — Config Page Initialization Hardening
 
 ### High-Level

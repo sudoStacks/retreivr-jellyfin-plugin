@@ -472,10 +472,10 @@
                 Jellyfin server plugins can expose dashboard pages, but full user-facing sidebar injection is limited by the web client platform.
               </p>
               <div class="retreivr-hero-actions">
-                <button id="RetreivrOpenUi" type="button">
+                <button id="RetreivrOpenUi" type="button" onclick="return window.RetreivrPluginPage ? window.RetreivrPluginPage.openUiClick() : false;">
                   <span>Open Retreivr UI</span>
                 </button>
-                <button id="RetreivrRefreshStatus" type="button" class="button-secondary">
+                <button id="RetreivrRefreshStatus" type="button" class="button-secondary" onclick="return window.RetreivrPluginPage ? window.RetreivrPluginPage.refreshStatusClick() : false;">
                   <span>Refresh Status</span>
                 </button>
               </div>
@@ -491,7 +491,7 @@
             </div>
           </div>
 
-          <form id="RetreivrConfigForm" class="retreivr-form-grid">
+          <div id="RetreivrConfigForm" class="retreivr-form-grid" role="form">
             <div class="retreivr-config-grid">
               <div class="retreivr-field">
                 <label for="ResolutionApiBaseUrl">Resolution API base URL</label>
@@ -546,12 +546,12 @@
             </div>
 
             <div class="retreivr-actions">
-              <button id="RetreivrSaveConfig" type="submit">
+              <button id="RetreivrSaveConfig" type="button" onclick="return window.RetreivrPluginPage ? window.RetreivrPluginPage.saveConfigClick() : false;">
                 <span>Save Settings</span>
               </button>
             </div>
             <div id="RetreivrConfigMessage" class="retreivr-message"></div>
-          </form>
+          </div>
         </section>
 
         <section class="retreivr-panel">
@@ -609,10 +609,10 @@
           </div>
 
           <div class="retreivr-actions">
-            <button id="MusicSearchSubmit" type="button">
+            <button id="MusicSearchSubmit" type="button" onclick="return window.RetreivrPluginPage ? window.RetreivrPluginPage.performSearchClick() : false;">
               <span>Search</span>
             </button>
-            <button id="MusicSearchBack" type="button" class="button-secondary" style="display:none;">
+            <button id="MusicSearchBack" type="button" class="button-secondary" style="display:none;" onclick="return window.RetreivrPluginPage ? window.RetreivrPluginPage.backClick() : false;">
               <span>Back</span>
             </button>
           </div>
@@ -1141,6 +1141,49 @@
       }
     };
 
+    const saveConfigClick = () => {
+      showLoading();
+      setMessage("RetreivrConfigMessage", "");
+      Promise.resolve()
+        .then(saveConfig)
+        .catch((err) => {
+          setMessage("RetreivrConfigMessage", `Save failed: ${err.message}`, true);
+        })
+        .finally(() => {
+          hideLoading();
+        });
+      return false;
+    };
+
+    const refreshStatusClick = () => {
+      setMessage("RetreivrConfigMessage", "");
+      loadStatus().catch((err) => {
+        setMessage("RetreivrConfigMessage", `Status refresh failed: ${err.message}`, true);
+      });
+      return false;
+    };
+
+    const openUiClick = () => {
+      const configured = normalizeBaseUrl(byId("RetreivrCoreBaseUrl")?.value || coreBaseUrl());
+      if (!configured) {
+        setMessage("RetreivrConfigMessage", "Retreivr Core base URL is not configured.", true);
+        return false;
+      }
+
+      window.open(configured, "_blank", "noopener");
+      return false;
+    };
+
+    const performSearchClick = () => {
+      performSearch();
+      return false;
+    };
+
+    const backClick = () => {
+      popView();
+      return false;
+    };
+
     const initializePage = () => {
       if (state.uiReady) {
         return true;
@@ -1161,40 +1204,10 @@
         refreshPage();
       });
 
-      form.addEventListener("submit", (event) => {
-        event.preventDefault();
-        showLoading();
-        setMessage("RetreivrConfigMessage", "");
-        Promise.resolve()
-          .then(saveConfig)
-          .catch((err) => {
-            setMessage("RetreivrConfigMessage", `Save failed: ${err.message}`, true);
-          })
-          .finally(() => {
-            hideLoading();
-          });
-        return false;
-      });
-
-      refreshButton.addEventListener("click", () => {
-        setMessage("RetreivrConfigMessage", "");
-        loadStatus().catch((err) => {
-          setMessage("RetreivrConfigMessage", `Status refresh failed: ${err.message}`, true);
-        });
-      });
-
-      openButton.addEventListener("click", () => {
-        const configured = normalizeBaseUrl(byId("RetreivrCoreBaseUrl")?.value || coreBaseUrl());
-        if (!configured) {
-          setMessage("RetreivrConfigMessage", "Retreivr Core base URL is not configured.", true);
-          return;
-        }
-
-        window.open(configured, "_blank", "noopener");
-      });
-
-      searchButton.addEventListener("click", () => performSearch());
-      backButton.addEventListener("click", () => popView());
+      refreshButton.addEventListener("click", refreshStatusClick);
+      openButton.addEventListener("click", openUiClick);
+      searchButton.addEventListener("click", performSearchClick);
+      backButton.addEventListener("click", backClick);
 
       state.uiReady = true;
       refreshPage();
@@ -1207,6 +1220,15 @@
       window.setTimeout(initializePage, 0);
       window.setTimeout(initializePage, 300);
     }
+
+    window.RetreivrPluginPage = {
+      initializePage,
+      saveConfigClick,
+      refreshStatusClick,
+      openUiClick,
+      performSearchClick,
+      backClick
+    };
   </script>
 </body>
 </html>
