@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented here.
 
+## v0.1.11 — Embedded Page Cache Bust
+
+### High-Level
+This release forces Jellyfin to load a new embedded dashboard page resource instead of reusing the older cached plugin page. It keeps the Jellyfin-native config request path from `v0.1.10` but moves the page onto a new embedded resource name so the latest HTML, CSS, and JavaScript actually reach the browser.
+
+### Changed
+- Plugin release metadata and packaging are now aligned to `v0.1.11`.
+
+### Fixed
+- The embedded plugin dashboard page now uses a new resource path to break stale Jellyfin/browser caching across plugin updates.
+- The plugin should now serve the current config page implementation instead of older cached markup and scripts.
+
 ## v0.1.10 — Jellyfin-Native Config Requests
 
 ### High-Level

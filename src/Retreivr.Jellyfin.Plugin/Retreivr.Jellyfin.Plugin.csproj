@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Configuration\configPage.html" />
-    <EmbeddedResource Include="Configuration\configPage.html" />
+    <None Remove="Configuration\configPage_v011.html" />
+    <EmbeddedResource Include="Configuration\configPage_v011.html" />
   </ItemGroup>
 
 </Project>

@@ -94,7 +94,7 @@ public sealed class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                 MenuIcon = "library_music",
                 EmbeddedResourcePath = string.Format(
                     CultureInfo.InvariantCulture,
-                    "{0}.Configuration.configPage.html",
+                    "{0}.Configuration.configPage_v011.html",
                     GetType().Namespace)
             }
         ];
