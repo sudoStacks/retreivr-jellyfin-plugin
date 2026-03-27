@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
 using MediaBrowser.Controller.Library;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Retreivr.Jellyfin.Plugin.Configuration;
@@ -16,6 +17,7 @@ namespace Retreivr.Jellyfin.Plugin.Api;
 /// </summary>
 [ApiController]
 [Route("Plugins/Retreivr")]
+[Authorize(Policy = "RequiresElevation")]
 public sealed class RetreivrPluginController : ControllerBase
 {
     private readonly ILibraryManager _libraryManager;
@@ -65,6 +67,7 @@ public sealed class RetreivrPluginController : ControllerBase
     [HttpGet("config")]
     public ActionResult<PluginConfiguration> GetConfig()
     {
+        _logger.LogInformation("Retreivr GET config called");
         return Ok(Plugin.Instance?.GetEffectiveConfiguration() ?? new PluginConfiguration());
     }
 
@@ -80,6 +83,7 @@ public sealed class RetreivrPluginController : ControllerBase
         }
 
         configuration ??= new PluginConfiguration();
+        _logger.LogInformation("Retreivr POST config called");
         var persisted = Plugin.Instance.PersistConfiguration(configuration);
         _logger.LogInformation(
             "Retreivr plugin config saved resolutionApiBaseUrl={ResolutionApiBaseUrl} retreivrCoreBaseUrl={RetreivrCoreBaseUrl} availabilityBadges={EnableAvailabilityBadges} instantPlayback={EnableInstantResolvedPlayback} downloadActions={EnableRetreivrDownloadActions}",

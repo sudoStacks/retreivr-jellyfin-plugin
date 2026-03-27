@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented here.
 
+## v0.1.10 — Jellyfin-Native Config Requests
+
+### High-Level
+This release switches the Retreivr dashboard page to Jellyfin-native authenticated API requests and jQuery Mobile page lifecycle hooks. The goal is to make config load/save survive reloads reliably inside the Jellyfin dashboard SPA instead of only appearing to change in the DOM.
+
+### Changed
+- Plugin release metadata and packaging are now aligned to `v0.1.10`.
+
+### Fixed
+- Plugin API requests now use Jellyfin `ApiClient.ajax(...)` and `ApiClient.getUrl(...)` instead of relying on raw unauthenticated `fetch(...)`.
+- The config page now binds refresh behavior through Jellyfin’s `pageshow` lifecycle.
+- The controller is explicitly elevation-protected and logs config GET/POST activity for debugging.
+- The settings layout now uses stacked labels/inputs instead of the cramped inline grid.
+
 ## v0.1.9 — Direct Config Action Fallbacks
 
 ### High-Level

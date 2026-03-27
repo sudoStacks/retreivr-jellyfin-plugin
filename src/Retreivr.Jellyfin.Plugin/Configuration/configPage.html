@@ -359,10 +359,10 @@
     }
 
     #RetreivrConfigPage .retreivr-field {
-      display: grid !important;
-      grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
-      align-items: center;
-      gap: 12px;
+      display: flex !important;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
     }
 
     #RetreivrConfigPage .retreivr-field input,
@@ -491,7 +491,7 @@
             </div>
           </div>
 
-          <div id="RetreivrConfigForm" class="retreivr-form-grid" role="form">
+          <form id="RetreivrConfigForm" class="retreivr-form-grid">
             <div class="retreivr-config-grid">
               <div class="retreivr-field">
                 <label for="ResolutionApiBaseUrl">Resolution API base URL</label>
@@ -546,12 +546,12 @@
             </div>
 
             <div class="retreivr-actions">
-              <button id="RetreivrSaveConfig" type="button" onclick="return window.RetreivrPluginPage ? window.RetreivrPluginPage.saveConfigClick() : false;">
+              <button id="RetreivrSaveConfig" type="submit" onclick="return window.RetreivrPluginPage ? window.RetreivrPluginPage.saveConfigClick() : false;">
                 <span>Save Settings</span>
               </button>
             </div>
             <div id="RetreivrConfigMessage" class="retreivr-message"></div>
-          </div>
+          </form>
         </section>
 
         <section class="retreivr-panel">
@@ -641,7 +641,8 @@
       config: { ...defaults },
       currentView: null,
       viewStack: [],
-      uiReady: false
+      uiReady: false,
+      lastApiDebug: ""
     };
 
     const byId = (id) => document.getElementById(id);
@@ -676,6 +677,11 @@
 
       el.textContent = text || "";
       el.classList.toggle("is-error", !!isError);
+    };
+
+    const setDebug = (text) => {
+      state.lastApiDebug = String(text || "");
+      console.debug("[RetreivrPlugin]", state.lastApiDebug);
     };
 
     const readConfigValue = (config, pascalName, fallback) => {
@@ -731,23 +737,100 @@
       updateUiMetric();
     };
 
+    const apiUrl = (path) => {
+      const normalized = String(path || "").startsWith("/") ? String(path) : `/${String(path || "")}`;
+      if (window.ApiClient && typeof window.ApiClient.getUrl === "function") {
+        try {
+          return window.ApiClient.getUrl(normalized.replace(/^\//, ""));
+        } catch (_err) {
+          return normalized;
+        }
+      }
+
+      return normalized;
+    };
+
+    const apiHeaders = (headers = {}) => {
+      const merged = { ...headers };
+      if (window.ApiClient) {
+        try {
+          const token = typeof window.ApiClient.accessToken === "function"
+            ? window.ApiClient.accessToken()
+            : (window.ApiClient._serverInfo && window.ApiClient._serverInfo.AccessToken);
+          if (token && !merged["X-Emby-Token"]) {
+            merged["X-Emby-Token"] = token;
+          }
+        } catch (_err) {
+          // Best-effort only.
+        }
+      }
+
+      return merged;
+    };
+
     const apiFetch = async (path, options = {}) => {
-      const response = await fetch(path, {
+      const url = apiUrl(path);
+      const method = String(options.method || options.type || "GET").toUpperCase();
+      const headers = apiHeaders(options.headers || {});
+
+      if (window.ApiClient && typeof window.ApiClient.ajax === "function") {
+        setDebug(`REQUEST ${method} ${url}`);
+
+        try {
+          const payload = await window.ApiClient.ajax({
+            type: method,
+            url,
+            dataType: "json",
+            cache: false,
+            headers,
+            contentType: options.contentType || headers["Content-Type"] || undefined,
+            data: options.body
+          });
+          setDebug(`OK ${method} ${url}`);
+          return payload;
+        } catch (error) {
+          const xhr = error && (error.xhr || error);
+          const status = xhr && xhr.status ? xhr.status : "ERR";
+          const responseText = xhr && xhr.responseText ? String(xhr.responseText).slice(0, 200) : "";
+          const message = responseText || (error && error.message) || `HTTP ${status}`;
+          setDebug(`FAIL ${method} ${url} ${status} ${message}`);
+          throw new Error(message);
+        }
+      }
+
+      const response = await fetch(url, {
         credentials: "same-origin",
         cache: "no-store",
-        ...options
+        ...options,
+        method,
+        headers
       });
+      const contentType = String(response.headers.get("content-type") || "").toLowerCase();
       let payload = null;
+      let rawText = "";
       try {
-        payload = await response.json();
+        if (contentType.includes("application/json")) {
+          payload = await response.json();
+        } else {
+          rawText = await response.text();
+        }
       } catch (_err) {
         payload = null;
       }
 
       if (!response.ok) {
-        const message = payload && payload.detail ? payload.detail : `HTTP ${response.status}`;
+        const message = payload && payload.detail ? payload.detail : rawText || `HTTP ${response.status}`;
+        setDebug(`FAIL ${method} ${url} ${message}`);
         throw new Error(message);
       }
+
+      if (!contentType.includes("application/json")) {
+        const detail = rawText ? rawText.slice(0, 160) : "non-json response";
+        setDebug(`Unexpected response from ${url}: ${detail}`);
+        throw new Error("Unexpected non-JSON response from Jellyfin plugin API");
+      }
+
+      setDebug(`OK ${method} ${url}`);
 
       return payload;
     };
@@ -1200,9 +1283,29 @@
         return false;
       }
 
-      page.addEventListener("pageshow", () => {
-        refreshPage();
-      });
+      if (window.$ && typeof window.$ === "function") {
+        window.$("#RetreivrConfigPage")
+          .off("pageshow.retreivr")
+          .on("pageshow.retreivr", () => {
+            refreshPage();
+          });
+
+        window.$("#RetreivrConfigForm")
+          .off("submit.retreivr")
+          .on("submit.retreivr", (event) => {
+            event.preventDefault();
+            return saveConfigClick();
+          });
+      } else {
+        page.addEventListener("pageshow", () => {
+          refreshPage();
+        });
+
+        form.addEventListener("submit", (event) => {
+          event.preventDefault();
+          saveConfigClick();
+        });
+      }
 
       refreshButton.addEventListener("click", refreshStatusClick);
       openButton.addEventListener("click", openUiClick);
